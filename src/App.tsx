@@ -34,7 +34,7 @@ const App = () => {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-gradient-to-b from-gray-100 to-gray-200">
+    <div className="h-screen w-screen overflow-hidden bg-white">
       {renderPage()}
 
       {/* Hidden canvas for photo capture */}

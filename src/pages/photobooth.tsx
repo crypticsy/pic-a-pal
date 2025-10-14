@@ -97,53 +97,77 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
   };
 
   const playShutterSound = () => {
-    // Create a more realistic camera shutter sound
+    // Create a realistic DSLR camera shutter sound
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const now = audioContext.currentTime;
 
-    // Create noise buffer for the mechanical sound
-    const bufferSize = audioContext.sampleRate * 0.05; // 50ms
-    const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
-    const data = buffer.getChannelData(0);
+    // Mirror flip-up sound (quick mechanical click)
+    const mirrorOsc = audioContext.createOscillator();
+    const mirrorGain = audioContext.createGain();
+    mirrorOsc.frequency.setValueAtTime(800, now);
+    mirrorOsc.frequency.exponentialRampToValueAtTime(200, now + 0.02);
+    mirrorGain.gain.setValueAtTime(0.3, now);
+    mirrorGain.gain.exponentialRampToValueAtTime(0.01, now + 0.02);
+    mirrorOsc.connect(mirrorGain);
+    mirrorGain.connect(audioContext.destination);
+    mirrorOsc.start(now);
+    mirrorOsc.stop(now + 0.02);
 
-    // Generate white noise
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
+    // Shutter opening sound (mechanical)
+    const shutterOpen = audioContext.createOscillator();
+    const shutterOpenGain = audioContext.createGain();
+    shutterOpen.frequency.setValueAtTime(600, now + 0.025);
+    shutterOpen.frequency.exponentialRampToValueAtTime(150, now + 0.045);
+    shutterOpenGain.gain.setValueAtTime(0.25, now + 0.025);
+    shutterOpenGain.gain.exponentialRampToValueAtTime(0.01, now + 0.045);
+    shutterOpen.connect(shutterOpenGain);
+    shutterOpenGain.connect(audioContext.destination);
+    shutterOpen.start(now + 0.025);
+    shutterOpen.stop(now + 0.045);
+
+    // Shutter closing sound (sharp click)
+    const shutterClose = audioContext.createOscillator();
+    const shutterCloseGain = audioContext.createGain();
+    shutterClose.frequency.setValueAtTime(700, now + 0.08);
+    shutterClose.frequency.exponentialRampToValueAtTime(180, now + 0.1);
+    shutterCloseGain.gain.setValueAtTime(0.35, now + 0.08);
+    shutterCloseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+    shutterClose.connect(shutterCloseGain);
+    shutterCloseGain.connect(audioContext.destination);
+    shutterClose.start(now + 0.08);
+    shutterClose.stop(now + 0.1);
+
+    // Mirror flip-down sound (completing the mechanical cycle)
+    const mirrorDown = audioContext.createOscillator();
+    const mirrorDownGain = audioContext.createGain();
+    mirrorDown.frequency.setValueAtTime(250, now + 0.12);
+    mirrorDown.frequency.exponentialRampToValueAtTime(700, now + 0.14);
+    mirrorDownGain.gain.setValueAtTime(0.28, now + 0.12);
+    mirrorDownGain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+    mirrorDown.connect(mirrorDownGain);
+    mirrorDownGain.connect(audioContext.destination);
+    mirrorDown.start(now + 0.12);
+    mirrorDown.stop(now + 0.14);
+
+    // Add mechanical noise texture
+    const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.15, audioContext.sampleRate);
+    const noiseData = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < noiseData.length; i++) {
+      noiseData[i] = (Math.random() * 2 - 1) * 0.15;
     }
-
     const noise = audioContext.createBufferSource();
-    noise.buffer = buffer;
-
+    noise.buffer = noiseBuffer;
     const noiseFilter = audioContext.createBiquadFilter();
     noiseFilter.type = 'bandpass';
-    noiseFilter.frequency.value = 2000;
-    noiseFilter.Q.value = 1;
-
+    noiseFilter.frequency.value = 1500;
+    noiseFilter.Q.value = 2;
     const noiseGain = audioContext.createGain();
-    noiseGain.gain.setValueAtTime(0.3, audioContext.currentTime);
-    noiseGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
-
+    noiseGain.gain.setValueAtTime(0.12, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
     noise.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
     noiseGain.connect(audioContext.destination);
-
-    // Add a click at the beginning
-    const oscillator = audioContext.createOscillator();
-    const clickGain = audioContext.createGain();
-
-    oscillator.frequency.value = 1000;
-    oscillator.type = 'sine';
-
-    clickGain.gain.setValueAtTime(0.5, audioContext.currentTime);
-    clickGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.02);
-
-    oscillator.connect(clickGain);
-    clickGain.connect(audioContext.destination);
-
-    noise.start(audioContext.currentTime);
-    noise.stop(audioContext.currentTime + 0.05);
-
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.02);
+    noise.start(now);
   };
 
   const takePhoto = () => {
@@ -187,8 +211,16 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
     // Shutter sound
     playShutterSound();
 
+    // Flip the image horizontally (mirror effect)
+    ctx.translate(size, 0);
+    ctx.scale(-1, 1);
+
     // Draw cropped square image
     ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
+
+    // Reset transformation
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
     return canvas.toDataURL('image/jpeg', 0.9);
   };
 
@@ -243,23 +275,38 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const stripWidth = 400;
-    const stripHeight = 1600;
-    const photoHeight = stripHeight / 4;
+    const outerBorder = 40; // Border around entire strip
+    const photoBorder = 15; // Border between photos
+    const photoSize = 400; // Each photo is square
 
-    canvas.width = stripWidth;
-    canvas.height = stripHeight;
+    // Calculate total height with borders between photos
+    const totalPhotoHeight = photoSize * 4;
+    const totalBorderHeight = photoBorder * 3; // 3 borders between 4 photos
 
+    const totalWidth = photoSize + (outerBorder * 2);
+    const totalHeight = totalPhotoHeight + totalBorderHeight + (outerBorder * 2);
+
+    canvas.width = totalWidth;
+    canvas.height = totalHeight;
+
+    // Fill with white background
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, stripWidth, stripHeight);
+    ctx.fillRect(0, 0, totalWidth, totalHeight);
+
+    let loadedImages = 0;
 
     photoStrip.photos.forEach((photoUrl, index) => {
       const img = new window.Image();
       img.src = photoUrl;
       img.onload = () => {
-        ctx.drawImage(img, 0, index * photoHeight, stripWidth, photoHeight);
+        // Calculate Y position with borders between photos
+        const yPos = outerBorder + (index * (photoSize + photoBorder));
 
-        if (index === photoStrip.photos.length - 1) {
+        // Draw photo
+        ctx.drawImage(img, outerBorder, yPos, photoSize, photoSize);
+        loadedImages++;
+
+        if (loadedImages === photoStrip.photos.length) {
           const link = document.createElement('a');
           link.download = `photo-strip-${photoStrip.id}.jpg`;
           link.href = canvas.toDataURL('image/jpeg', 0.95);
@@ -286,19 +333,21 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
               stopCamera();
               navigateTo('home');
             }}
-            className="text-black hover:text-gray-600 transition-colors flex items-center gap-2"
+            className="text-black hover:text-gray-600 transition-colors flex items-center gap-2 doodle-button bg-white px-3 py-2"
+            style={{ fontFamily: "'Caveat', cursive" }}
           >
             <ArrowLeft className="w-6 h-6" />
-            <span>Back</span>
+            <span className="text-lg font-bold">Back</span>
           </button>
 
-          <h1 className="text-2xl font-bold text-black" style={{ fontFamily: 'monospace' }}>
+          <h1 className="text-3xl font-bold text-black wavy-underline" style={{ fontFamily: "'Permanent Marker', cursive" }}>
             PHOTO BOOTH
           </h1>
 
           <button
             onClick={() => navigateTo('gallery')}
-            className="bg-black text-white hover:bg-gray-800 px-4 py-2 rounded-lg transition-colors text-sm"
+            className="bg-gray-100 text-black hover:bg-gray-200 px-4 py-2 doodle-button transition-colors text-base font-bold"
+            style={{ fontFamily: "'Caveat', cursive" }}
           >
             Gallery ({appState.photoStrips?.length || 0})
           </button>
@@ -307,9 +356,9 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
         {stage === 'loading' && (
           <div className="space-y-6">
             {/* Camera Loading */}
-            <div className="bg-white border-8 border-gray-800 rounded-3xl p-6">
-              <div className="bg-black rounded-2xl p-4 relative">
-                <div className="aspect-square relative overflow-hidden rounded-lg">
+            <div className="bg-white doodle-border-thick text-black p-6 sketch-shadow rotate-1">
+              <div className="bg-gray-900 doodle-box p-4 relative">
+                <div className="aspect-square relative overflow-hidden doodle-border">
                   <video
                     ref={refs.videoRef}
                     autoPlay
@@ -319,7 +368,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                       position: 'absolute',
                       top: '50%',
                       left: '50%',
-                      transform: 'translate(-50%, -50%)',
+                      transform: 'translate(-50%, -50%) scaleX(-1)',
                       minWidth: '100%',
                       minHeight: '100%',
                       width: 'auto',
@@ -336,11 +385,11 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
               </div>
 
               <div className="mt-6 text-center">
-                <p className="text-gray-800 text-2xl font-bold animate-pulse" style={{ fontFamily: 'monospace' }}>
+                <p className="text-black text-3xl font-bold animate-pulse" style={{ fontFamily: "'Permanent Marker', cursive" }}>
                   LOADING CAMERA...
                 </p>
                 {appState.myStream && (
-                  <p className="text-gray-600 text-sm mt-2">Stream active: {appState.myStream.active ? 'Yes' : 'No'}</p>
+                  <p className="text-gray-600 text-base mt-2 font-semibold" style={{ fontFamily: "'Caveat', cursive" }}>Stream active: {appState.myStream.active ? 'Yes' : 'No'}</p>
                 )}
               </div>
             </div>
@@ -348,9 +397,9 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
         )}
 
         {stage === 'countdown' && (
-          <div className="bg-white border-8 border-gray-800 rounded-3xl p-6">
-            <div className="bg-black rounded-2xl p-4 relative">
-              <div className="aspect-square relative overflow-hidden rounded-lg">
+          <div className="bg-gray-100 doodle-border-thick text-black p-6 sketch-shadow -rotate-1">
+            <div className="bg-gray-900 doodle-box p-4 relative">
+              <div className="aspect-square relative overflow-hidden doodle-border">
                 <video
                   ref={refs.videoRef}
                   autoPlay
@@ -360,7 +409,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                     position: 'absolute',
                     top: '50%',
                     left: '50%',
-                    transform: 'translate(-50%, -50%)',
+                    transform: 'translate(-50%, -50%) scaleX(-1)',
                     minWidth: '100%',
                     minHeight: '100%',
                     width: 'auto',
@@ -375,7 +424,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                 )}
 
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-5">
-                  <div className="text-white text-9xl font-bold animate-pulse" style={{ fontFamily: 'monospace' }}>
+                  <div className="text-white text-9xl font-bold animate-pulse" style={{ fontFamily: "'Permanent Marker', cursive" }}>
                     {countdown}
                   </div>
                 </div>
@@ -383,7 +432,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-gray-800 text-xl font-bold" style={{ fontFamily: 'monospace' }}>
+              <p className="text-black text-3xl font-bold" style={{ fontFamily: "'Permanent Marker', cursive" }}>
                 GET READY!
               </p>
             </div>
@@ -391,9 +440,9 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
         )}
 
         {stage === 'capturing' && (
-          <div className="bg-white border-8 border-gray-800 rounded-3xl p-6">
-            <div className="bg-black rounded-2xl p-4 relative">
-              <div className="aspect-square relative overflow-hidden rounded-lg">
+          <div className="bg-gray-200 doodle-border-thick text-black p-6 sketch-shadow rotate-2">
+            <div className="bg-gray-900 doodle-box p-4 relative">
+              <div className="aspect-square relative overflow-hidden doodle-border">
                 <video
                   ref={refs.videoRef}
                   autoPlay
@@ -403,7 +452,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                     position: 'absolute',
                     top: '50%',
                     left: '50%',
-                    transform: 'translate(-50%, -50%)',
+                    transform: 'translate(-50%, -50%) scaleX(-1)',
                     minWidth: '100%',
                     minHeight: '100%',
                     width: 'auto',
@@ -418,7 +467,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                 )}
 
                 <div className="absolute top-8 left-0 right-0 flex justify-center z-5">
-                  <div className="bg-black text-white px-6 py-3 rounded-full font-bold text-xl border-4 border-white" style={{ fontFamily: 'monospace' }}>
+                  <div className="bg-white text-black px-6 py-3 doodle-button font-bold text-xl border-4 border-black" style={{ fontFamily: "'Permanent Marker', cursive" }}>
                     PHOTO {currentPhotoIndex} OF 4
                   </div>
                 </div>
@@ -429,12 +478,12 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
               {[1, 2, 3, 4].map((num) => (
                 <div
                   key={num}
-                  className={`h-3 rounded-full ${
+                  className={`h-3 doodle-border ${
                     num < currentPhotoIndex
-                      ? 'bg-gray-800'
+                      ? 'bg-black'
                       : num === currentPhotoIndex
                       ? 'bg-gray-600 animate-pulse'
-                      : 'bg-gray-300'
+                      : 'bg-gray-200'
                   }`}
                 />
               ))}
@@ -444,19 +493,19 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
 
         {stage === 'complete' && photoStrip && (
           <div className="space-y-6">
-            <div className="bg-white border-8 border-gray-800 rounded-xl p-6">
-              <h2 className="text-2xl font-bold text-black mb-4 text-center" style={{ fontFamily: 'monospace' }}>
+            <div className="bg-white doodle-border-thick text-black p-6 sketch-shadow -rotate-2">
+              <h2 className="text-4xl font-bold text-black mb-4 text-center wavy-underline" style={{ fontFamily: "'Permanent Marker', cursive" }}>
                 YOUR PHOTO STRIP!
               </h2>
 
-              <div className="max-w-md mx-auto bg-white rounded-lg p-4 shadow-2xl border-4 border-gray-800 max-h-[600px] overflow-y-auto">
+              <div className="max-w-md mx-auto bg-gray-100 doodle-box p-4 shadow-2xl max-h-[600px] overflow-y-auto">
                 <div className="space-y-2">
                   {photoStrip.photos.map((photo, index) => (
                     <img
                       key={index}
                       src={photo}
                       alt={`Photo ${index + 1}`}
-                      className="w-full rounded border-2 border-gray-300"
+                      className="w-full doodle-border"
                     />
                   ))}
                 </div>
@@ -465,7 +514,8 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
               <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
                 <button
                   onClick={downloadStrip}
-                  className="bg-black hover:bg-gray-800 text-white font-bold py-3 px-8 rounded-lg transition-colors flex items-center justify-center gap-2 text-lg border-2 border-gray-800"
+                  className="bg-black hover:bg-gray-800 text-white font-bold py-3 px-8 doodle-button transition-colors flex items-center justify-center gap-2 text-lg rotate-1"
+                  style={{ fontFamily: "'Permanent Marker', cursive" }}
                 >
                   <Download className="w-5 h-5" />
                   Download Strip
@@ -473,7 +523,8 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
 
                 <button
                   onClick={reset}
-                  className="bg-white hover:bg-gray-200 text-black font-bold py-3 px-8 rounded-lg transition-colors flex items-center justify-center gap-2 text-lg border-2 border-gray-800"
+                  className="bg-white hover:bg-gray-100 text-black font-bold py-3 px-8 doodle-button transition-colors flex items-center justify-center gap-2 text-lg -rotate-1"
+                  style={{ fontFamily: "'Permanent Marker', cursive" }}
                 >
                   <Camera className="w-5 h-5" />
                   Take Another
