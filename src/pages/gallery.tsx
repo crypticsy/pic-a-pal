@@ -84,17 +84,16 @@ export const GalleryPage = ({ navigateTo, appState, setAppState }: GalleryPagePr
           <button
             onClick={() => navigateTo('home')}
             className="text-black hover:text-gray-600 transition-colors flex items-center gap-2 doodle-button bg-white px-3 py-2"
-            style={{ fontFamily: "'Caveat', cursive" }}
           >
             <ArrowLeft className="w-6 h-6" />
             <span className="text-lg font-bold">Back</span>
           </button>
 
-          <h1 className="text-3xl font-bold text-black wavy-underline" style={{ fontFamily: "'Permanent Marker', cursive" }}>
+          <h1 className="text-3xl font-bold text-black wavy-underline">
             PHOTO GALLERY
           </h1>
 
-          <div className="text-black text-lg font-bold bg-gray-100 px-3 py-2 doodle-border" style={{ fontFamily: "'Caveat', cursive" }}>
+          <div className="text-black text-lg font-bold bg-gray-100 px-3 py-2 doodle-border">
             {photoStrips.length} strip{photoStrips.length !== 1 ? 's' : ''}
           </div>
         </div>
@@ -102,12 +101,11 @@ export const GalleryPage = ({ navigateTo, appState, setAppState }: GalleryPagePr
         {photoStrips.length === 0 ? (
           <div className="bg-white doodle-border-thick text-black p-12 text-center sketch-shadow rotate-1">
             <Image className="w-16 h-16 text-black mx-auto mb-4" />
-            <h2 className="text-3xl text-black mb-2 font-bold" style={{ fontFamily: "'Permanent Marker', cursive" }}>No photo strips yet</h2>
-            <p className="text-gray-600 mb-6 text-lg font-semibold" style={{ fontFamily: "'Caveat', cursive" }}>Take some photos to see them here!</p>
+            <h2 className="text-3xl text-black mb-2 font-bold">No photo strips yet</h2>
+            <p className="text-gray-600 mb-6 text-lg font-semibold">Take some photos to see them here!</p>
             <button
               onClick={() => navigateTo('photobooth')}
               className="bg-black hover:bg-gray-800 text-white font-bold px-8 py-3 doodle-button transition-colors flex items-center gap-2 mx-auto"
-              style={{ fontFamily: "'Permanent Marker', cursive" }}
             >
               <Camera className="w-5 h-5" />
               START PHOTO BOOTH
@@ -134,8 +132,8 @@ export const GalleryPage = ({ navigateTo, appState, setAppState }: GalleryPagePr
 
                   {/* Strip Info */}
                   <div className="text-center mb-3">
-                    <p className="text-black font-bold text-base" style={{ fontFamily: "'Caveat', cursive" }}>{strip.date}</p>
-                    <p className="text-gray-600 text-sm font-semibold" style={{ fontFamily: "'Caveat', cursive" }}>{strip.timestamp}</p>
+                    <p className="text-black font-bold text-base">{strip.date}</p>
+                    <p className="text-gray-600 text-sm font-semibold">{strip.timestamp}</p>
                   </div>
 
                   {/* Action Buttons */}
@@ -143,7 +141,6 @@ export const GalleryPage = ({ navigateTo, appState, setAppState }: GalleryPagePr
                     <button
                       onClick={() => downloadStrip(strip)}
                       className="flex-1 bg-black hover:bg-gray-800 text-white py-2 px-3 doodle-button transition-colors flex items-center justify-center gap-2 text-sm font-bold"
-                      style={{ fontFamily: "'Caveat', cursive" }}
                     >
                       <Download className="w-4 h-4" />
                       Download
@@ -166,7 +163,6 @@ export const GalleryPage = ({ navigateTo, appState, setAppState }: GalleryPagePr
           <button
             onClick={() => navigateTo('photobooth')}
             className="bg-black hover:bg-gray-800 text-white font-bold px-8 py-3 doodle-button transition-colors flex items-center gap-2 -rotate-2"
-            style={{ fontFamily: "'Permanent Marker', cursive" }}
           >
             <Camera className="w-5 h-5" />
             TAKE MORE PHOTOS

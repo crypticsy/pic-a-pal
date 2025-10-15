@@ -27,12 +27,15 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
   const [showFlash, setShowFlash] = useState(false);
 
   useEffect(() => {
+    let streamRef: MediaStream | null = null;
+
     const initCamera = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { width: 1280, height: 720 },
           audio: false
         });
+        streamRef = stream;
         setAppState((prev: typeof appState) => ({ ...prev, myStream: stream }));
       } catch (err) {
         console.error('Error accessing camera:', err);
@@ -42,10 +45,23 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
 
     initCamera();
 
+    // Cleanup function to stop camera when component unmounts
     return () => {
-      if (appState.myStream) {
-        appState.myStream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+      console.log('Cleaning up camera...');
+      if (streamRef) {
+        streamRef.getTracks().forEach((track: MediaStreamTrack) => {
+          console.log('Stopping track:', track.label);
+          track.stop();
+        });
+        streamRef = null;
       }
+      // Also stop any stream in appState
+      setAppState((prev: typeof appState) => {
+        if (prev.myStream) {
+          prev.myStream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+        }
+        return { ...prev, myStream: null };
+      });
     };
   }, []);
 
@@ -90,84 +106,70 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
   }, [cameraReady, stage]);
 
   const stopCamera = () => {
-    if (appState.myStream) {
-      appState.myStream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
-      setAppState((prev: typeof appState) => ({ ...prev, myStream: null }));
+    console.log('=== stopCamera called ===');
+
+    // Stop video element srcObject FIRST
+    if (refs.videoRef.current) {
+      const video = refs.videoRef.current;
+      if (video.srcObject) {
+        console.log('Stopping video.srcObject tracks');
+        const videoTracks = (video.srcObject as MediaStream).getTracks();
+        videoTracks.forEach(track => {
+          console.log('Stopping video track:', track.label, 'state:', track.readyState);
+          track.stop();
+          console.log('Video track after stop:', track.readyState);
+        });
+        video.srcObject = null;
+        console.log('video.srcObject set to null');
+      }
     }
+
+    // Then stop appState.myStream
+    if (appState.myStream) {
+      console.log('Stopping appState.myStream tracks');
+      const stateTracks = appState.myStream.getTracks();
+      stateTracks.forEach((track: MediaStreamTrack) => {
+        console.log('Stopping state track:', track.label, 'state:', track.readyState);
+        track.stop();
+        console.log('State track after stop:', track.readyState);
+      });
+    }
+
+    // Clear from appState
+    setAppState((prev: typeof appState) => ({ ...prev, myStream: null }));
+    console.log('=== stopCamera complete ===');
   };
 
   const playShutterSound = () => {
-    // Create a realistic DSLR camera shutter sound
+    // Create 8-bit retro camera shutter sound
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     const now = audioContext.currentTime;
 
-    // Mirror flip-up sound (quick mechanical click)
-    const mirrorOsc = audioContext.createOscillator();
-    const mirrorGain = audioContext.createGain();
-    mirrorOsc.frequency.setValueAtTime(800, now);
-    mirrorOsc.frequency.exponentialRampToValueAtTime(200, now + 0.02);
-    mirrorGain.gain.setValueAtTime(0.3, now);
-    mirrorGain.gain.exponentialRampToValueAtTime(0.01, now + 0.02);
-    mirrorOsc.connect(mirrorGain);
-    mirrorGain.connect(audioContext.destination);
-    mirrorOsc.start(now);
-    mirrorOsc.stop(now + 0.02);
+    // 8-bit click sound (square wave)
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(880, now);
+    osc.frequency.exponentialRampToValueAtTime(110, now + 0.08);
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    osc.start(now);
+    osc.stop(now + 0.08);
 
-    // Shutter opening sound (mechanical)
-    const shutterOpen = audioContext.createOscillator();
-    const shutterOpenGain = audioContext.createGain();
-    shutterOpen.frequency.setValueAtTime(600, now + 0.025);
-    shutterOpen.frequency.exponentialRampToValueAtTime(150, now + 0.045);
-    shutterOpenGain.gain.setValueAtTime(0.25, now + 0.025);
-    shutterOpenGain.gain.exponentialRampToValueAtTime(0.01, now + 0.045);
-    shutterOpen.connect(shutterOpenGain);
-    shutterOpenGain.connect(audioContext.destination);
-    shutterOpen.start(now + 0.025);
-    shutterOpen.stop(now + 0.045);
-
-    // Shutter closing sound (sharp click)
-    const shutterClose = audioContext.createOscillator();
-    const shutterCloseGain = audioContext.createGain();
-    shutterClose.frequency.setValueAtTime(700, now + 0.08);
-    shutterClose.frequency.exponentialRampToValueAtTime(180, now + 0.1);
-    shutterCloseGain.gain.setValueAtTime(0.35, now + 0.08);
-    shutterCloseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-    shutterClose.connect(shutterCloseGain);
-    shutterCloseGain.connect(audioContext.destination);
-    shutterClose.start(now + 0.08);
-    shutterClose.stop(now + 0.1);
-
-    // Mirror flip-down sound (completing the mechanical cycle)
-    const mirrorDown = audioContext.createOscillator();
-    const mirrorDownGain = audioContext.createGain();
-    mirrorDown.frequency.setValueAtTime(250, now + 0.12);
-    mirrorDown.frequency.exponentialRampToValueAtTime(700, now + 0.14);
-    mirrorDownGain.gain.setValueAtTime(0.28, now + 0.12);
-    mirrorDownGain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
-    mirrorDown.connect(mirrorDownGain);
-    mirrorDownGain.connect(audioContext.destination);
-    mirrorDown.start(now + 0.12);
-    mirrorDown.stop(now + 0.14);
-
-    // Add mechanical noise texture
-    const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.15, audioContext.sampleRate);
-    const noiseData = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < noiseData.length; i++) {
-      noiseData[i] = (Math.random() * 2 - 1) * 0.15;
-    }
-    const noise = audioContext.createBufferSource();
-    noise.buffer = noiseBuffer;
-    const noiseFilter = audioContext.createBiquadFilter();
-    noiseFilter.type = 'bandpass';
-    noiseFilter.frequency.value = 1500;
-    noiseFilter.Q.value = 2;
-    const noiseGain = audioContext.createGain();
-    noiseGain.gain.setValueAtTime(0.12, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-    noise.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(audioContext.destination);
-    noise.start(now);
+    // Second 8-bit blip
+    const osc2 = audioContext.createOscillator();
+    const gain2 = audioContext.createGain();
+    osc2.type = 'square';
+    osc2.frequency.setValueAtTime(440, now + 0.05);
+    osc2.frequency.exponentialRampToValueAtTime(220, now + 0.1);
+    gain2.gain.setValueAtTime(0.2, now + 0.05);
+    gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+    osc2.connect(gain2);
+    gain2.connect(audioContext.destination);
+    osc2.start(now + 0.05);
+    osc2.stop(now + 0.1);
   };
 
   const takePhoto = () => {
@@ -265,6 +267,9 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
       photoStrips: [...prev.photoStrips, strip]
     }));
 
+    // Stop camera after photos are taken
+    stopCamera();
+
     setStage('complete');
   };
 
@@ -317,15 +322,36 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
   };
 
   const reset = () => {
-    setStage('countdown');
+    console.log('Reset called - stopping camera first');
+
+    // Stop camera before reinitializing
+    stopCamera();
+
+    setStage('loading');
     setPhotoStrip(null);
     setCurrentPhotoIndex(0);
     setCountdown(3);
+    setCameraReady(false);
+
+    // Reinitialize camera after a brief delay to ensure cleanup is complete
+    setTimeout(async () => {
+      try {
+        console.log('Reinitializing camera...');
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 1280, height: 720 },
+          audio: false
+        });
+        setAppState((prev: typeof appState) => ({ ...prev, myStream: stream }));
+      } catch (err) {
+        console.error('Error accessing camera:', err);
+        alert('Unable to access camera. Please allow camera permissions.');
+      }
+    }, 100);
   };
 
   return (
     <div className="h-full w-full p-4 bg-white overflow-y-auto">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <button
@@ -334,20 +360,21 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
               navigateTo('home');
             }}
             className="text-black hover:text-gray-600 transition-colors flex items-center gap-2 doodle-button bg-white px-3 py-2"
-            style={{ fontFamily: "'Caveat', cursive" }}
           >
             <ArrowLeft className="w-6 h-6" />
-            <span className="text-lg font-bold">Back</span>
+            <span className="text-xs md:text-lg font-bold">Back</span>
           </button>
 
-          <h1 className="text-3xl font-bold text-black wavy-underline" style={{ fontFamily: "'Permanent Marker', cursive" }}>
+          <h1 className="text-md md:text-lg font-bold text-black wavy-underline text-center">
             PHOTO BOOTH
           </h1>
 
           <button
-            onClick={() => navigateTo('gallery')}
-            className="bg-gray-100 text-black hover:bg-gray-200 px-4 py-2 doodle-button transition-colors text-base font-bold"
-            style={{ fontFamily: "'Caveat', cursive" }}
+            onClick={() => {
+              stopCamera();
+              navigateTo('gallery');
+            }}
+            className="bg-gray-100 text-black hover:bg-gray-200 px-4 py-2 doodle-button transition-colors  text-xs md:text-lg font-bold"
           >
             Gallery ({appState.photoStrips?.length || 0})
           </button>
@@ -385,11 +412,11 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
               </div>
 
               <div className="mt-6 text-center">
-                <p className="text-black text-3xl font-bold animate-pulse" style={{ fontFamily: "'Permanent Marker', cursive" }}>
+                <p className="text-black text-3xl font-bold animate-pulse">
                   LOADING CAMERA...
                 </p>
                 {appState.myStream && (
-                  <p className="text-gray-600 text-base mt-2 font-semibold" style={{ fontFamily: "'Caveat', cursive" }}>Stream active: {appState.myStream.active ? 'Yes' : 'No'}</p>
+                  <p className="text-gray-600 text-base mt-2 font-semibold">Stream active: {appState.myStream.active ? 'Yes' : 'No'}</p>
                 )}
               </div>
             </div>
@@ -424,7 +451,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                 )}
 
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-5">
-                  <div className="text-white text-9xl font-bold animate-pulse" style={{ fontFamily: "'Permanent Marker', cursive" }}>
+                  <div className="text-white text-9xl font-bold animate-pulse">
                     {countdown}
                   </div>
                 </div>
@@ -432,7 +459,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-black text-3xl font-bold" style={{ fontFamily: "'Permanent Marker', cursive" }}>
+              <p className="text-black text-3xl font-bold">
                 GET READY!
               </p>
             </div>
@@ -467,7 +494,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                 )}
 
                 <div className="absolute top-8 left-0 right-0 flex justify-center z-5">
-                  <div className="bg-white text-black px-6 py-3 doodle-button font-bold text-xl border-4 border-black" style={{ fontFamily: "'Permanent Marker', cursive" }}>
+                  <div className="bg-white text-black px-6 py-3 doodle-button font-bold text-xl border-4 border-black">
                     PHOTO {currentPhotoIndex} OF 4
                   </div>
                 </div>
@@ -494,7 +521,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
         {stage === 'complete' && photoStrip && (
           <div className="space-y-6">
             <div className="bg-white doodle-border-thick text-black p-6 sketch-shadow -rotate-2">
-              <h2 className="text-4xl font-bold text-black mb-4 text-center wavy-underline" style={{ fontFamily: "'Permanent Marker', cursive" }}>
+              <h2 className="text-4xl font-bold text-black mb-4 text-center wavy-underline">
                 YOUR PHOTO STRIP!
               </h2>
 
@@ -515,7 +542,6 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                 <button
                   onClick={downloadStrip}
                   className="bg-black hover:bg-gray-800 text-white font-bold py-3 px-8 doodle-button transition-colors flex items-center justify-center gap-2 text-lg rotate-1"
-                  style={{ fontFamily: "'Permanent Marker', cursive" }}
                 >
                   <Download className="w-5 h-5" />
                   Download Strip
@@ -524,7 +550,6 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                 <button
                   onClick={reset}
                   className="bg-white hover:bg-gray-100 text-black font-bold py-3 px-8 doodle-button transition-colors flex items-center justify-center gap-2 text-lg -rotate-1"
-                  style={{ fontFamily: "'Permanent Marker', cursive" }}
                 >
                   <Camera className="w-5 h-5" />
                   Take Another
