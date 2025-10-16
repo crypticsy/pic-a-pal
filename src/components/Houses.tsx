@@ -64,8 +64,8 @@ const generateBuilding = (config: BuildingConfig, index: number) => {
                     key={colIndex}
                     className={`${
                       isLit
-                        ? 'bg-gray-700 dark:bg-yellow-300'
-                        : 'bg-gray-800 dark:bg-gray-900'
+                        ? 'bg-gray-700/40 dark:bg-yellow-200/10'
+                        : 'bg-gray-800/20 dark:bg-gray-900/40'
                     }`}
                     style={{ width: `${windowSize}px`, height: `${windowSize}px` }}
                   ></div>
