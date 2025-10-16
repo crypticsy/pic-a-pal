@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Camera, ArrowLeft, Download } from 'lucide-react';
+import { FaCamera, FaArrowLeft, FaDownload } from 'react-icons/fa6';
 import { Footer } from '../components/Footer';
 
 type PhotoBoothProps = {
@@ -424,9 +424,9 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
               stopCamera();
               navigateTo('home');
             }}
-            className="transition-colors flex items-center gap-2 doodle-button px-3 py-2 bg-white dark:bg-gray-900 text-black dark:text-white border-black dark:border-white"
+            className="transition-colors flex items-center gap-2 doodle-button px-3 py-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300"
           >
-            <ArrowLeft className="w-6 h-6" />
+            <FaArrowLeft className="w-6 h-6" />
             <span className="text-xs md:text-lg font-bold">Back</span>
           </button>
 
@@ -439,7 +439,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
               stopCamera();
               navigateTo('gallery');
             }}
-            className="px-4 py-2 doodle-button transition-colors text-xs md:text-lg font-bold bg-gray-100 dark:bg-gray-700 text-black dark:text-white border-black dark:border-white"
+            className="px-4 py-2 doodle-button transition-colors text-xs md:text-lg font-bold bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300"
           >
             Gallery ({appState.photoStrips?.length || 0})
           </button>
@@ -448,7 +448,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
         {stage === 'loading' && (
           <div className="space-y-6">
             {/* Camera Loading */}
-            <div className="doodle-border-thick p-6 sketch-shadow rotate-1 bg-white dark:bg-gray-900 text-black dark:text-white border-black dark:border-white">
+            <div className="doodle-border-thick p-6 sketch-shadow rotate-1 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
               <div className="bg-gray-900 doodle-box p-4 relative">
                 <div className="aspect-square relative overflow-hidden doodle-border">
                   {debugCamera ? (
@@ -499,7 +499,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
         )}
 
         {stage === 'countdown' && (
-          <div className="doodle-border-thick p-6 sketch-shadow -rotate-1 bg-white dark:bg-gray-900 text-black dark:text-white border-black dark:border-white">
+          <div className="doodle-border-thick p-6 sketch-shadow -rotate-1 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
             <div className="bg-gray-900 doodle-box p-4 relative">
               <div className="aspect-square relative overflow-hidden doodle-border">
                 {debugCamera ? (
@@ -555,7 +555,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
         )}
 
         {stage === 'capturing' && (
-          <div className="doodle-border-thick p-6 sketch-shadow rotate-2 bg-white dark:bg-gray-900 text-black dark:text-white border-black dark:border-white">
+          <div className="doodle-border-thick p-6 sketch-shadow rotate-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
             <div className="bg-gray-900 doodle-box p-4 relative">
               <div className="aspect-square relative overflow-hidden doodle-border">
                 {debugCamera ? (
@@ -621,7 +621,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
 
         {stage === 'complete' && photoStrip && (
           <div className="space-y-6">
-            <div className="doodle-border-thick p-6 sketch-shadow -rotate-2 bg-white dark:bg-gray-900 text-black dark:text-white border-black dark:border-white">
+            <div className="doodle-border-thick p-6 sketch-shadow -rotate-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
               <h2 className="text-4xl font-bold mb-4 text-center wavy-underline text-black dark:text-white">
                 YOUR PHOTO STRIP!
               </h2>
@@ -642,17 +642,17 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
               <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
                 <button
                   onClick={downloadStrip}
-                  className="font-bold py-3 px-8 doodle-button transition-colors flex items-center justify-center gap-2 text-lg rotate-1 bg-black dark:bg-white text-white dark:text-black border-black dark:border-white"
+                  className="font-bold py-3 px-8 doodle-button transition-colors flex items-center justify-center gap-2 text-lg rotate-1 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 border-gray-800 dark:border-gray-300"
                 >
-                  <Download className="w-5 h-5" />
+                  <FaDownload className="w-5 h-5" />
                   Download Strip
                 </button>
 
                 <button
                   onClick={reset}
-                  className="font-bold py-3 px-8 doodle-button transition-colors flex items-center justify-center gap-2 text-lg -rotate-1 bg-white dark:bg-gray-900 text-black dark:text-white border-black dark:border-white"
+                  className="font-bold py-3 px-8 doodle-button transition-colors flex items-center justify-center gap-2 text-lg -rotate-1 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300"
                 >
-                  <Camera className="w-5 h-5" />
+                  <FaCamera className="w-5 h-5" />
                   Take Another
                 </button>
               </div>

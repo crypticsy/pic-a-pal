@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Settings as SettingsIcon, X } from "lucide-react";
+import { IoSettings, IoClose } from "react-icons/io5";
 
 type SettingsProps = {
   appState: any;
@@ -16,10 +16,10 @@ export const Settings = ({ appState, setAppState }: SettingsProps) => {
       {/* Settings Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="absolute top-4 right-4 z-30 bg-transparent p-2 transition-colors text-black dark:text-white"
+        className="absolute top-4 right-4 z-30 bg-transparent p-2 transition-colors text-slate-500 hover:text-slate-800 dark:text-slate-400 hover:dark:text-white cursor-pointer"
         title="Settings"
       >
-        <SettingsIcon className="w-5 h-5 md:w-6 md:h-6" />
+        <IoSettings className="w-5 h-5 md:w-8 md:h-8" />
       </button>
 
       {/* Settings Modal */}
@@ -29,9 +29,9 @@ export const Settings = ({ appState, setAppState }: SettingsProps) => {
             {/* Close Button */}
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute top-4 right-4 transition-colors text-black dark:text-white"
+              className="absolute top-4 right-4 z-100 transition-colors text-black dark:text-white p-1 rounded-full cursor-pointer"
             >
-              <X className="w-6 h-6" />
+              <IoClose className="w-6 h-6" />
             </button>
 
             {/* Header */}

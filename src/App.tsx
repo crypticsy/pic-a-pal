@@ -81,7 +81,7 @@ const App = () => {
   };
 
   return (
-    <div className={`h-screen w-screen overflow-hidden bg-white dark:bg-gray-800 ${isInitialLoad ? 'opacity-0' : 'fade-in'}`}>
+    <div className={`h-screen w-screen overflow-hidden ${isInitialLoad ? 'opacity-0' : 'fade-in'}`}>
       <div className={isTransitioning ? 'fade-out ' : 'fade-in ' + ' h-full w-full'}>
         {renderPage()}
       </div>
