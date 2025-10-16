@@ -2,6 +2,9 @@ import { FaImage, FaCameraRotate } from "react-icons/fa6";
 import { LuCoins } from "react-icons/lu";
 import { Footer } from "../components/Footer";
 import { Settings } from "../components/Settings";
+import { Houses } from "../components/Houses";
+import { Clouds } from "../components/Clouds";
+import { Stars } from "../components/Stars";
 import { useState, useEffect } from "react";
 
 // Home Page Component
@@ -51,11 +54,21 @@ export const HomePage = ({
 
       {/* Main Scene Container */}
       <div className="absolute inset-0 flex flex-col">
+        {/* Stars (only in dark mode) */}
+        <Stars />
 
-        {/* Sky Area (upper 60%) */}
-        <div className="flex-grow flex items-end justify-center pb-0 relative">
+        {/* Clouds */}
+        <Clouds />
+
+        {/* Sky Area */}
+        <div className="flex-1 flex items-end justify-center pb-0 relative overflow-visible">
+          {/* Houses positioned above ground (farthest back) */}
+          <div className="absolute bottom-0 left-0 right-0 z-0">
+            <Houses />
+          </div>
+
           {/* Photo Booth Structure */}
-          <div className="mb-0 z-10 relative">
+          <div className="mb-0 z-30 relative">
             {/* Top Sign */}
             <div className="doodle-border-thick p-2 sm:p-3 md:p-4 shadow-2xl sketch-shadow mx-6 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
               <h1 className="text-sm sm:text-base md:text-xl lg:text-2xl font-black text-center leading-tight text-black dark:text-white">
@@ -172,8 +185,8 @@ export const HomePage = ({
           </div>
         </div>
 
-        {/* Ground Area (lower 40%) - Minimal black/white */}
-        <div className="h-10 sm:h-26 md:h-14 bg-gray-400 dark:bg-slate-950 border-y-0 relative overflow-hidden" />
+        {/* Ground Area - base only */}
+        <div className="h-10 sm:h-12 md:h-14 bg-gray-500 dark:bg-slate-950 border-y-0 relative"></div>
       </div>
 
       <Footer />
