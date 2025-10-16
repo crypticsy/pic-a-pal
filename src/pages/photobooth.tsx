@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Camera, ArrowLeft, Download } from 'lucide-react';
+import { Footer } from '../components/Footer';
 
 type PhotoBoothProps = {
   navigateTo: (route: string) => void;
@@ -25,14 +26,30 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [cameraReady, setCameraReady] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
+  const photoCount = appState?.photoCount || 4;
+  const cameraFacing = appState?.cameraFacing || 'user';
+  const shouldMirror = cameraFacing === 'user';
+  const debugCamera = appState?.debugCamera || false;
 
   useEffect(() => {
     let streamRef: MediaStream | null = null;
 
     const initCamera = async () => {
+      // Skip camera initialization if debug mode is enabled
+      if (debugCamera) {
+        console.log('Debug mode: Skipping camera initialization');
+        setCameraReady(true);
+        return;
+      }
+
       try {
+        const cameraFacing = appState?.cameraFacing || 'user';
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: 1280, height: 720 },
+          video: {
+            width: 1280,
+            height: 720,
+            facingMode: cameraFacing
+          },
           audio: false
         });
         streamRef = stream;
@@ -173,23 +190,63 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
   };
 
   const takePhoto = () => {
-    if (!refs.videoRef.current || !refs.canvasRef.current) {
-      console.error('Video or canvas ref not available');
-      return null;
-    }
-
-    const video = refs.videoRef.current;
     const canvas = refs.canvasRef.current;
-
-    // Check if video is actually playing
-    if (video.readyState !== video.HAVE_ENOUGH_DATA) {
-      console.error('Video not ready');
+    if (!canvas) {
+      console.error('Canvas ref not available');
       return null;
     }
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
       console.error('Canvas context not available');
+      return null;
+    }
+
+    // Flash effect
+    setShowFlash(true);
+    setTimeout(() => setShowFlash(false), 150);
+
+    // Shutter sound
+    playShutterSound();
+
+    // Debug mode: Generate placeholder image
+    if (debugCamera) {
+      const size = 800;
+      canvas.width = size;
+      canvas.height = size;
+
+      // Generate a gradient background
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8'];
+      const colorIndex = currentPhotoIndex % colors.length;
+      gradient.addColorStop(0, colors[colorIndex]);
+      gradient.addColorStop(1, colors[(colorIndex + 1) % colors.length]);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+
+      // Add text
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 60px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`DEBUG PHOTO ${currentPhotoIndex}`, size / 2, size / 2);
+      ctx.font = '30px Arial';
+      ctx.fillText(new Date().toLocaleTimeString(), size / 2, size / 2 + 60);
+
+      return canvas.toDataURL('image/jpeg', 0.9);
+    }
+
+    // Normal mode: Capture from video
+    if (!refs.videoRef.current) {
+      console.error('Video ref not available');
+      return null;
+    }
+
+    const video = refs.videoRef.current;
+
+    // Check if video is actually playing
+    if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+      console.error('Video not ready');
       return null;
     }
 
@@ -206,16 +263,12 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
     canvas.width = size;
     canvas.height = size;
 
-    // Flash effect
-    setShowFlash(true);
-    setTimeout(() => setShowFlash(false), 150);
-
-    // Shutter sound
-    playShutterSound();
-
-    // Flip the image horizontally (mirror effect)
-    ctx.translate(size, 0);
-    ctx.scale(-1, 1);
+    // Flip the image horizontally (mirror effect) only for front camera
+    const cameraFacing = appState?.cameraFacing || 'user';
+    if (cameraFacing === 'user') {
+      ctx.translate(size, 0);
+      ctx.scale(-1, 1);
+    }
 
     // Draw cropped square image
     ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
@@ -242,7 +295,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
   const capturePhotoSequence = async () => {
     const photos: string[] = [];
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < photoCount; i++) {
       setCurrentPhotoIndex(i + 1);
       await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -285,8 +338,9 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
     const photoSize = 400; // Each photo is square
 
     // Calculate total height with borders between photos
-    const totalPhotoHeight = photoSize * 4;
-    const totalBorderHeight = photoBorder * 3; // 3 borders between 4 photos
+    const numPhotos = photoStrip.photos.length;
+    const totalPhotoHeight = photoSize * numPhotos;
+    const totalBorderHeight = photoBorder * (numPhotos - 1); // borders between photos
 
     const totalWidth = photoSize + (outerBorder * 2);
     const totalHeight = totalPhotoHeight + totalBorderHeight + (outerBorder * 2);
@@ -335,10 +389,21 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
 
     // Reinitialize camera after a brief delay to ensure cleanup is complete
     setTimeout(async () => {
+      // Skip camera initialization if debug mode is enabled
+      if (appState?.debugCamera) {
+        console.log('Debug mode: Skipping camera reinitialization');
+        return;
+      }
+
       try {
         console.log('Reinitializing camera...');
+        const cameraFacing = appState?.cameraFacing || 'user';
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: 1280, height: 720 },
+          video: {
+            width: 1280,
+            height: 720,
+            facingMode: cameraFacing
+          },
           audio: false
         });
         setAppState((prev: typeof appState) => ({ ...prev, myStream: stream }));
@@ -350,7 +415,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
   };
 
   return (
-    <div className="h-full w-full p-4 bg-white overflow-y-auto">
+    <div className="h-full w-full p-4 overflow-y-auto bg-white dark:bg-gray-900 text-black dark:text-white">
       <div className="max-w-xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -359,13 +424,13 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
               stopCamera();
               navigateTo('home');
             }}
-            className="text-black hover:text-gray-600 transition-colors flex items-center gap-2 doodle-button bg-white px-3 py-2"
+            className="transition-colors flex items-center gap-2 doodle-button px-3 py-2 bg-white dark:bg-gray-900 text-black dark:text-white border-black dark:border-white"
           >
             <ArrowLeft className="w-6 h-6" />
             <span className="text-xs md:text-lg font-bold">Back</span>
           </button>
 
-          <h1 className="text-md md:text-lg font-bold text-black wavy-underline text-center">
+          <h1 className="text-md md:text-lg font-bold wavy-underline text-center text-black dark:text-white">
             PHOTO BOOTH
           </h1>
 
@@ -374,7 +439,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
               stopCamera();
               navigateTo('gallery');
             }}
-            className="bg-gray-100 text-black hover:bg-gray-200 px-4 py-2 doodle-button transition-colors  text-xs md:text-lg font-bold"
+            className="px-4 py-2 doodle-button transition-colors text-xs md:text-lg font-bold bg-gray-100 dark:bg-gray-700 text-black dark:text-white border-black dark:border-white"
           >
             Gallery ({appState.photoStrips?.length || 0})
           </button>
@@ -383,27 +448,37 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
         {stage === 'loading' && (
           <div className="space-y-6">
             {/* Camera Loading */}
-            <div className="bg-white doodle-border-thick text-black p-6 sketch-shadow rotate-1">
+            <div className="doodle-border-thick p-6 sketch-shadow rotate-1 bg-white dark:bg-gray-900 text-black dark:text-white border-black dark:border-white">
               <div className="bg-gray-900 doodle-box p-4 relative">
                 <div className="aspect-square relative overflow-hidden doodle-border">
-                  <video
-                    ref={refs.videoRef}
-                    autoPlay
-                    playsInline
-                    muted
-                    style={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%) scaleX(-1)',
-                      minWidth: '100%',
-                      minHeight: '100%',
-                      width: 'auto',
-                      height: 'auto',
-                      objectFit: 'cover'
-                    }}
-                    className="bg-black"
-                  />
+                  {debugCamera ? (
+                    /* Debug Mode Placeholder */
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500">
+                      <div className="text-center">
+                        <p className="text-white text-2xl font-bold">DEBUG MODE</p>
+                        <p className="text-white text-sm mt-2">No camera required</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <video
+                      ref={refs.videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: `translate(-50%, -50%) scaleX(${shouldMirror ? -1 : 1})`,
+                        minWidth: '100%',
+                        minHeight: '100%',
+                        width: 'auto',
+                        height: 'auto',
+                        objectFit: 'cover'
+                      }}
+                      className="bg-black"
+                    />
+                  )}
                   {/* Flash overlay for camera only */}
                   {showFlash && (
                     <div className="absolute inset-0 bg-white z-10 pointer-events-none" style={{ animation: 'flash 0.15s ease-out' }} />
@@ -412,11 +487,11 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
               </div>
 
               <div className="mt-6 text-center">
-                <p className="text-black text-3xl font-bold animate-pulse">
-                  LOADING CAMERA...
+                <p className="text-3xl font-bold animate-pulse text-black dark:text-white">
+                  {debugCamera ? 'DEBUG MODE READY' : 'LOADING CAMERA...'}
                 </p>
-                {appState.myStream && (
-                  <p className="text-gray-600 text-base mt-2 font-semibold">Stream active: {appState.myStream.active ? 'Yes' : 'No'}</p>
+                {appState.myStream && !debugCamera && (
+                  <p className="text-base mt-2 font-semibold text-gray-600 dark:text-gray-400">Stream active: {appState.myStream.active ? 'Yes' : 'No'}</p>
                 )}
               </div>
             </div>
@@ -424,42 +499,55 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
         )}
 
         {stage === 'countdown' && (
-          <div className="bg-gray-100 doodle-border-thick text-black p-6 sketch-shadow -rotate-1">
+          <div className="doodle-border-thick p-6 sketch-shadow -rotate-1 bg-white dark:bg-gray-900 text-black dark:text-white border-black dark:border-white">
             <div className="bg-gray-900 doodle-box p-4 relative">
               <div className="aspect-square relative overflow-hidden doodle-border">
-                <video
-                  ref={refs.videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%) scaleX(-1)',
-                    minWidth: '100%',
-                    minHeight: '100%',
-                    width: 'auto',
-                    height: 'auto',
-                    objectFit: 'cover'
-                  }}
-                  className="bg-black"
-                />
-                {/* Flash overlay for camera only */}
-                {showFlash && (
-                  <div className="absolute inset-0 bg-white z-10 pointer-events-none" style={{ animation: 'flash 0.15s ease-out' }} />
-                )}
-
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-5">
-                  <div className="text-white text-9xl font-bold animate-pulse">
-                    {countdown}
+                {debugCamera ? (
+                  /* Debug Mode Placeholder */
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-500 to-green-500">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-5">
+                      <div className="text-white text-9xl font-bold animate-pulse">
+                        {countdown}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    <video
+                      ref={refs.videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: `translate(-50%, -50%) scaleX(${shouldMirror ? -1 : 1})`,
+                        minWidth: '100%',
+                        minHeight: '100%',
+                        width: 'auto',
+                        height: 'auto',
+                        objectFit: 'cover'
+                      }}
+                      className="bg-black"
+                    />
+                    {/* Flash overlay for camera only */}
+                    {showFlash && (
+                      <div className="absolute inset-0 bg-white z-10 pointer-events-none" style={{ animation: 'flash 0.15s ease-out' }} />
+                    )}
+
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-5">
+                      <div className="text-white text-9xl font-bold animate-pulse">
+                        {countdown}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-black text-3xl font-bold">
+              <p className="text-3xl font-bold text-black dark:text-white">
                 GET READY!
               </p>
             </div>
@@ -467,42 +555,55 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
         )}
 
         {stage === 'capturing' && (
-          <div className="bg-gray-200 doodle-border-thick text-black p-6 sketch-shadow rotate-2">
+          <div className="doodle-border-thick p-6 sketch-shadow rotate-2 bg-white dark:bg-gray-900 text-black dark:text-white border-black dark:border-white">
             <div className="bg-gray-900 doodle-box p-4 relative">
               <div className="aspect-square relative overflow-hidden doodle-border">
-                <video
-                  ref={refs.videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%) scaleX(-1)',
-                    minWidth: '100%',
-                    minHeight: '100%',
-                    width: 'auto',
-                    height: 'auto',
-                    objectFit: 'cover'
-                  }}
-                  className="bg-black"
-                />
-                {/* Flash overlay for camera only */}
-                {showFlash && (
-                  <div className="absolute inset-0 bg-white z-10 pointer-events-none" style={{ animation: 'flash 0.15s ease-out' }} />
-                )}
-
-                <div className="absolute top-8 left-0 right-0 flex justify-center z-5">
-                  <div className="bg-white text-black px-6 py-3 doodle-button font-bold text-xl border-4 border-black">
-                    PHOTO {currentPhotoIndex} OF 4
+                {debugCamera ? (
+                  /* Debug Mode Placeholder */
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-orange-500 to-red-500">
+                    <div className="absolute top-8 left-0 right-0 flex justify-center z-5">
+                      <div className="bg-white text-black px-6 py-3 doodle-button font-bold text-xl border-4 border-black">
+                        PHOTO {currentPhotoIndex} OF {photoCount}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    <video
+                      ref={refs.videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: `translate(-50%, -50%) scaleX(${shouldMirror ? -1 : 1})`,
+                        minWidth: '100%',
+                        minHeight: '100%',
+                        width: 'auto',
+                        height: 'auto',
+                        objectFit: 'cover'
+                      }}
+                      className="bg-black"
+                    />
+                    {/* Flash overlay for camera only */}
+                    {showFlash && (
+                      <div className="absolute inset-0 bg-white z-10 pointer-events-none" style={{ animation: 'flash 0.15s ease-out' }} />
+                    )}
+
+                    <div className="absolute top-8 left-0 right-0 flex justify-center z-5">
+                      <div className="bg-white text-black px-6 py-3 doodle-button font-bold text-xl border-4 border-black">
+                        PHOTO {currentPhotoIndex} OF {photoCount}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-4 gap-2">
-              {[1, 2, 3, 4].map((num) => (
+            <div className={`mt-4 grid gap-2`} style={{ gridTemplateColumns: `repeat(${photoCount}, minmax(0, 1fr))` }}>
+              {Array.from({ length: photoCount }, (_, i) => i + 1).map((num) => (
                 <div
                   key={num}
                   className={`h-3 doodle-border ${
@@ -520,8 +621,8 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
 
         {stage === 'complete' && photoStrip && (
           <div className="space-y-6">
-            <div className="bg-white doodle-border-thick text-black p-6 sketch-shadow -rotate-2">
-              <h2 className="text-4xl font-bold text-black mb-4 text-center wavy-underline">
+            <div className="doodle-border-thick p-6 sketch-shadow -rotate-2 bg-white dark:bg-gray-900 text-black dark:text-white border-black dark:border-white">
+              <h2 className="text-4xl font-bold mb-4 text-center wavy-underline text-black dark:text-white">
                 YOUR PHOTO STRIP!
               </h2>
 
@@ -541,7 +642,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
               <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
                 <button
                   onClick={downloadStrip}
-                  className="bg-black hover:bg-gray-800 text-white font-bold py-3 px-8 doodle-button transition-colors flex items-center justify-center gap-2 text-lg rotate-1"
+                  className="font-bold py-3 px-8 doodle-button transition-colors flex items-center justify-center gap-2 text-lg rotate-1 bg-black dark:bg-white text-white dark:text-black border-black dark:border-white"
                 >
                   <Download className="w-5 h-5" />
                   Download Strip
@@ -549,7 +650,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
 
                 <button
                   onClick={reset}
-                  className="bg-white hover:bg-gray-100 text-black font-bold py-3 px-8 doodle-button transition-colors flex items-center justify-center gap-2 text-lg -rotate-1"
+                  className="font-bold py-3 px-8 doodle-button transition-colors flex items-center justify-center gap-2 text-lg -rotate-1 bg-white dark:bg-gray-900 text-black dark:text-white border-black dark:border-white"
                 >
                   <Camera className="w-5 h-5" />
                   Take Another
@@ -559,6 +660,8 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
           </div>
         )}
       </div>
+
+      <Footer />
     </div>
   );
 };

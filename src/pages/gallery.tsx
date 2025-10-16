@@ -1,4 +1,5 @@
 import { Camera, Download, Image, ArrowLeft, Trash2 } from 'lucide-react';
+import { Footer } from '../components/Footer';
 
 type PhotoStripType = {
   id: number;
@@ -11,10 +12,6 @@ type GalleryPageProps = {
   navigateTo: (route: string) => void;
   appState: any;
   setAppState: React.Dispatch<React.SetStateAction<any>>;
-  refs: {
-    videoRef: React.RefObject<HTMLVideoElement | null>;
-    canvasRef: React.RefObject<HTMLCanvasElement | null>;
-  };
 };
 
 // Gallery Page Component
@@ -77,35 +74,35 @@ export const GalleryPage = ({ navigateTo, appState, setAppState }: GalleryPagePr
   const photoStrips = appState.photoStrips || [];
 
   return (
-    <div className="h-full w-full p-4 bg-white overflow-y-auto">
+    <div className="h-full w-full p-4 overflow-y-auto bg-white dark:bg-gray-900 text-black dark:text-white">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between pb-12">
           <button
             onClick={() => navigateTo('home')}
-            className="text-black hover:text-gray-600 transition-colors flex items-center gap-2 doodle-button bg-white px-3 py-2"
+            className="transition-colors flex items-center gap-2 doodle-button px-3 py-2 bg-white dark:bg-gray-900 text-black dark:text-white border-black dark:border-white"
           >
             <ArrowLeft className="w-6 h-6" />
             <span className="text-lg font-bold">Back</span>
           </button>
 
-          <h1 className="text-3xl font-bold text-black wavy-underline">
+          <h1 className="text-3xl font-bold wavy-underline text-black dark:text-white">
             PHOTO GALLERY
           </h1>
 
-          <div className="text-black text-lg font-bold bg-gray-100 px-3 py-2 doodle-border">
+          <div className="text-lg font-bold px-3 py-2 doodle-border bg-gray-100 dark:bg-gray-700 text-black dark:text-white border-black dark:border-white">
             {photoStrips.length} strip{photoStrips.length !== 1 ? 's' : ''}
           </div>
         </div>
 
         {photoStrips.length === 0 ? (
-          <div className="bg-white doodle-border-thick text-black p-12 text-center sketch-shadow rotate-1">
-            <Image className="w-16 h-16 text-black mx-auto mb-4" />
-            <h2 className="text-3xl text-black mb-2 font-bold">No photo strips yet</h2>
-            <p className="text-gray-600 mb-6 text-lg font-semibold">Take some photos to see them here!</p>
+          <div className="doodle-border-thick p-12 text-center sketch-shadow rotate-1 bg-white dark:bg-gray-900 text-black dark:text-white border-black dark:border-white">
+            <Image className="w-16 h-16 mx-auto mb-4 text-black dark:text-white" />
+            <h2 className="text-3xl mb-2 font-bold text-black dark:text-white">No photo strips yet</h2>
+            <p className="mb-6 text-lg font-semibold text-gray-600 dark:text-gray-400">Take some photos to see them here!</p>
             <button
               onClick={() => navigateTo('photobooth')}
-              className="bg-black hover:bg-gray-800 text-white font-bold px-8 py-3 doodle-button transition-colors flex items-center gap-2 mx-auto"
+              className="font-bold px-8 py-3 doodle-button transition-colors flex items-center gap-2 mx-auto bg-black dark:bg-white text-white dark:text-black border-black dark:border-white"
             >
               <Camera className="w-5 h-5" />
               START PHOTO BOOTH
@@ -115,7 +112,7 @@ export const GalleryPage = ({ navigateTo, appState, setAppState }: GalleryPagePr
           <div className="max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {photoStrips.map((strip: PhotoStripType, idx: number) => (
-                <div key={strip.id} className={`bg-gray-100 doodle-border-thick text-black p-4 sketch-shadow ${idx % 3 === 0 ? 'rotate-1' : idx % 3 === 1 ? '-rotate-1' : 'rotate-2'}`}>
+                <div key={strip.id} className={`doodle-border-thick p-4 sketch-shadow ${idx % 3 === 0 ? 'rotate-1' : idx % 3 === 1 ? '-rotate-1' : 'rotate-2'} bg-gray-100 dark:bg-gray-700 text-black dark:text-white border-black dark:border-white`}>
                   {/* Photo Strip Preview */}
                   <div className="bg-white doodle-box p-2 mb-3 shadow-lg max-h-[400px] overflow-y-auto">
                     <div className="space-y-1">
@@ -132,22 +129,22 @@ export const GalleryPage = ({ navigateTo, appState, setAppState }: GalleryPagePr
 
                   {/* Strip Info */}
                   <div className="text-center mb-3">
-                    <p className="text-black font-bold text-base">{strip.date}</p>
-                    <p className="text-gray-600 text-sm font-semibold">{strip.timestamp}</p>
+                    <p className="font-bold text-base text-black dark:text-white">{strip.date}</p>
+                    <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">{strip.timestamp}</p>
                   </div>
 
                   {/* Action Buttons */}
                   <div className="flex gap-2">
                     <button
                       onClick={() => downloadStrip(strip)}
-                      className="flex-1 bg-black hover:bg-gray-800 text-white py-2 px-3 doodle-button transition-colors flex items-center justify-center gap-2 text-sm font-bold"
+                      className="flex-1 py-2 px-3 doodle-button transition-colors flex items-center justify-center gap-2 text-sm font-bold bg-black dark:bg-white text-white dark:text-black border-black dark:border-white"
                     >
                       <Download className="w-4 h-4" />
                       Download
                     </button>
                     <button
                       onClick={() => deleteStrip(strip.id)}
-                      className="bg-white hover:bg-gray-200 text-black p-2 doodle-button transition-colors"
+                      className="p-2 doodle-button transition-colors bg-white dark:bg-gray-900 text-black dark:text-white border-black dark:border-white"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -159,16 +156,19 @@ export const GalleryPage = ({ navigateTo, appState, setAppState }: GalleryPagePr
         )}
 
         {/* Navigation */}
+        {photoStrips.length !== 0 && (
         <div className="mt-8 flex justify-center">
           <button
             onClick={() => navigateTo('photobooth')}
-            className="bg-black hover:bg-gray-800 text-white font-bold px-8 py-3 doodle-button transition-colors flex items-center gap-2 -rotate-2"
+            className="font-bold px-8 py-3 doodle-button transition-colors flex items-center gap-2 -rotate-2 bg-black dark:bg-white text-white dark:text-black border-black dark:border-white"
           >
             <Camera className="w-5 h-5" />
             TAKE MORE PHOTOS
           </button>
-        </div>
+        </div>)}
       </div>
+
+      <Footer />
     </div>
   );
 };

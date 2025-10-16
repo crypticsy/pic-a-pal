@@ -10,7 +10,11 @@ const App = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [appState, setAppState] = useState({
     myStream: null,
-    photoStrips: []
+    photoStrips: JSON.parse(localStorage.getItem('photoStrips') || '[]'),
+    photoCount: parseInt(localStorage.getItem('photoCount') || '4'),
+    cameraFacing: localStorage.getItem('cameraFacing') || 'user',
+    debugCamera: localStorage.getItem('debugCamera') === 'true',
+    theme: localStorage.getItem('theme') || 'light'
   });
 
   const refs = {
@@ -22,6 +26,36 @@ const App = () => {
   useEffect(() => {
     setTimeout(() => setIsInitialLoad(false), 100);
   }, []);
+
+  // Apply theme to document and save to local storage
+  useEffect(() => {
+    if (appState.theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', appState.theme);
+  }, [appState.theme]);
+
+  // Save photoCount to localStorage
+  useEffect(() => {
+    localStorage.setItem('photoCount', appState.photoCount.toString());
+  }, [appState.photoCount]);
+
+  // Save cameraFacing to localStorage
+  useEffect(() => {
+    localStorage.setItem('cameraFacing', appState.cameraFacing);
+  }, [appState.cameraFacing]);
+
+  // Save debugCamera to localStorage
+  useEffect(() => {
+    localStorage.setItem('debugCamera', appState.debugCamera.toString());
+  }, [appState.debugCamera]);
+
+  // Save photoStrips to localStorage
+  useEffect(() => {
+    localStorage.setItem('photoStrips', JSON.stringify(appState.photoStrips));
+  }, [appState.photoStrips]);
 
   const navigateTo = (page: string) => {
     if (page === currentPage) return;
@@ -36,18 +70,18 @@ const App = () => {
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <HomePage navigateTo={navigateTo} appState={appState} />;
+        return <HomePage navigateTo={navigateTo} appState={appState} setAppState={setAppState} />;
       case 'photobooth':
         return <PhotoBoothPage navigateTo={navigateTo} appState={appState} setAppState={setAppState} refs={refs} />;
       case 'gallery':
-        return <GalleryPage navigateTo={navigateTo} appState={appState} setAppState={setAppState} refs={refs} />;
+        return <GalleryPage navigateTo={navigateTo} appState={appState} setAppState={setAppState} />;
       default:
-        return <HomePage navigateTo={navigateTo} appState={appState} />;
+        return <HomePage navigateTo={navigateTo} appState={appState} setAppState={setAppState} />;
     }
   };
 
   return (
-    <div className={`h-screen w-screen overflow-hidden bg-white ${isInitialLoad ? 'opacity-0' : 'fade-in'}`}>
+    <div className={`h-screen w-screen overflow-hidden bg-white dark:bg-gray-800 ${isInitialLoad ? 'opacity-0' : 'fade-in'}`}>
       <div className={isTransitioning ? 'fade-out ' : 'fade-in ' + ' h-full w-full'}>
         {renderPage()}
       </div>
