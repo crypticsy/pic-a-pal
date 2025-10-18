@@ -10,13 +10,13 @@ type BuildingConfig = {
 const COLOR = 'bg-gray-400 dark:bg-gray-950';
 
 const generateWindowPattern = (totalWindows: number): boolean[] =>
-  Array.from({ length: totalWindows }, () => Math.random() > 0.4);
+  Array.from({ length: totalWindows }, () => Math.random() > 0.3);
 
 const calculateWindowGrid = (width: number, height: number) => {
   const cols = width < 70 ? 2 : width < 100 ? 3 : width < 130 ? 4 : 5;
   const availableWidth = width - 16;
   const availableHeight = height - 16;
-  const gap = 3;
+  const gap = 4;
   const windowWidth = Math.floor((availableWidth - (cols - 1) * gap) / cols);
   const rows = Math.max(3, Math.floor(availableHeight / (windowWidth + gap)));
   return { cols, rows, windowSize: windowWidth };

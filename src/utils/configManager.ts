@@ -98,7 +98,6 @@ const parseConfigString = (configString: string): Omit<GoogleDriveConfig, 'isKey
  * Get Google Drive configuration based on priority:
  * 1. URL key-based config (from environment)
  * 2. Manual localStorage config (from Settings UI)
- * 3. Environment variables (fallback)
  */
 export const getGoogleDriveConfig = (): GoogleDriveConfig => {
   // Priority 1: Check for key-based configuration
@@ -132,15 +131,11 @@ export const getGoogleDriveConfig = (): GoogleDriveConfig => {
     };
   }
 
-  // Priority 3: Fallback to environment variables (legacy support)
-  const envEnabled = import.meta.env.VITE_GOOGLE_DRIVE_AUTO_UPLOAD === 'true';
-  const envClientId = import.meta.env.VITE_GOOGLE_DRIVE_CLIENT_ID || '';
-  const envFolderId = import.meta.env.VITE_GOOGLE_DRIVE_FOLDER_ID || '';
-
+  // No configuration found - return disabled state
   return {
-    enabled: envEnabled,
-    clientId: envClientId,
-    folderId: envFolderId,
+    enabled: false,
+    clientId: '',
+    folderId: '',
     isKeyBased: false,
   };
 };

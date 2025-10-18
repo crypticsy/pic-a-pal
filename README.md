@@ -54,14 +54,13 @@ The app requires camera access to function. You'll be prompted to allow camera p
 
 ## Google Drive Auto-Upload (Optional)
 
-You can configure the app to automatically upload photo strips to Google Drive when they are captured. There are three ways to configure this feature, with different priority levels.
+You can configure the app to automatically upload photo strips to Google Drive when they are captured. There are two ways to configure this feature, with different priority levels.
 
 ### Configuration Methods (Priority Order)
 
-The app supports three configuration methods in this priority order:
+The app supports two configuration methods in this priority order:
 1. **URL Key-Based Config** (Highest - for events/shared deployments)
-2. **Manual UI Config** (Medium - for personal use)
-3. **Environment Variables** (Lowest - legacy/fallback)
+2. **Manual UI Config** (for personal use)
 
 ---
 
@@ -135,34 +134,3 @@ This method allows users to configure their own Google Drive settings via the ap
 - Settings are saved in browser's localStorage and persist across sessions
 - Users have full control to enable/disable and modify settings
 - Great for personal use or development
-
----
-
-### Method 3: Environment Variables (Legacy/Fallback)
-
-This method is for backward compatibility and deployment scenarios.
-
-#### Setup:
-- Copy `.env.example` to `.env`
-- Set:
-  ```
-  VITE_GOOGLE_DRIVE_AUTO_UPLOAD=true
-  VITE_GOOGLE_DRIVE_CLIENT_ID=your_client_id
-  VITE_GOOGLE_DRIVE_FOLDER_ID=folder_id
-  ```
-
----
-
-### General Information
-
-#### How Auto-Upload Works:
-- When enabled, the app prompts for Google sign-in on first use
-- After taking photos, the strip is automatically uploaded to Google Drive
-- Photos are saved as `photo-strip-[timestamp].jpg`
-- If a folder ID is specified, photos go there; otherwise, they go to "My Drive"
-
-#### Getting a Folder ID:
-1. Open Google Drive in your browser
-2. Navigate to or create the destination folder
-3. The folder ID is in the URL: `https://drive.google.com/drive/folders/FOLDER_ID_HERE`
-4. Copy and use this ID in your configuration

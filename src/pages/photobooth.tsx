@@ -3,6 +3,7 @@ import { FaCamera, FaArrowLeft, FaDownload } from 'react-icons/fa6';
 import { Footer } from '../components/Footer';
 import { uploadPhotoToGoogleDrive, isGoogleDriveEnabled } from '../utils/googleDrive';
 import { FilterType, getCSSFilter, applyCanvasFilter } from '../utils/filters';
+import { createPhotoStripCanvas, downloadPhotoStrip } from '../utils/photostrip';
 
 type PhotoBoothProps = {
   navigateTo: (route: string) => void;
@@ -192,54 +193,6 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
     osc2.stop(now + 0.1);
   };
 
-  const createCompositeStrip = async (photos: string[]): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const canvas = refs.canvasRef.current;
-      if (!canvas) {
-        reject(new Error('Canvas ref not available'));
-        return;
-      }
-
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        reject(new Error('Canvas context not available'));
-        return;
-      }
-
-      const outerBorder = 40;
-      const photoBorder = 15;
-      const photoSize = 400;
-      const numPhotos = photos.length;
-      const totalPhotoHeight = photoSize * numPhotos;
-      const totalBorderHeight = photoBorder * (numPhotos - 1);
-      const totalWidth = photoSize + (outerBorder * 2);
-      const totalHeight = totalPhotoHeight + totalBorderHeight + (outerBorder * 2);
-
-      canvas.width = totalWidth;
-      canvas.height = totalHeight;
-
-      // Fill with white background
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, totalWidth, totalHeight);
-
-      let loadedImages = 0;
-
-      photos.forEach((photoUrl, index) => {
-        const img = new window.Image();
-        img.src = photoUrl;
-        img.onload = () => {
-          const yPos = outerBorder + (index * (photoSize + photoBorder));
-          ctx.drawImage(img, outerBorder, yPos, photoSize, photoSize);
-          loadedImages++;
-
-          if (loadedImages === photos.length) {
-            resolve(canvas.toDataURL('image/jpeg', 0.95));
-          }
-        };
-        img.onerror = () => reject(new Error('Failed to load image'));
-      });
-    });
-  };
 
   const takePhoto = () => {
     const canvas = refs.canvasRef.current;
@@ -382,7 +335,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
     if (isGoogleDriveEnabled()) {
       try {
         // Create a composite photo strip image
-        const compositeImage = await createCompositeStrip(photos);
+        const compositeImage = await createPhotoStripCanvas(photos);
         const filename = `photo-strip-${strip.id}.jpg`;
         await uploadPhotoToGoogleDrive(compositeImage, filename);
         console.log('Photo strip automatically uploaded to Google Drive');
@@ -394,53 +347,9 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
     setStage('complete');
   };
 
-  const downloadStrip = () => {
-    if (!photoStrip || !refs.canvasRef.current) return;
-
-    const canvas = refs.canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const outerBorder = 40; // Border around entire strip
-    const photoBorder = 15; // Border between photos
-    const photoSize = 400; // Each photo is square
-
-    // Calculate total height with borders between photos
-    const numPhotos = photoStrip.photos.length;
-    const totalPhotoHeight = photoSize * numPhotos;
-    const totalBorderHeight = photoBorder * (numPhotos - 1); // borders between photos
-
-    const totalWidth = photoSize + (outerBorder * 2);
-    const totalHeight = totalPhotoHeight + totalBorderHeight + (outerBorder * 2);
-
-    canvas.width = totalWidth;
-    canvas.height = totalHeight;
-
-    // Fill with white background
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, totalWidth, totalHeight);
-
-    let loadedImages = 0;
-
-    photoStrip.photos.forEach((photoUrl, index) => {
-      const img = new window.Image();
-      img.src = photoUrl;
-      img.onload = () => {
-        // Calculate Y position with borders between photos
-        const yPos = outerBorder + (index * (photoSize + photoBorder));
-
-        // Draw photo
-        ctx.drawImage(img, outerBorder, yPos, photoSize, photoSize);
-        loadedImages++;
-
-        if (loadedImages === photoStrip.photos.length) {
-          const link = document.createElement('a');
-          link.download = `photo-strip-${photoStrip.id}.jpg`;
-          link.href = canvas.toDataURL('image/jpeg', 0.95);
-          link.click();
-        }
-      };
-    });
+  const handleDownloadStrip = () => {
+    if (!photoStrip) return;
+    downloadPhotoStrip(photoStrip.photos, `photo-strip-${photoStrip.id}.jpg`);
   };
 
   const reset = () => {
@@ -712,7 +621,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
 
               <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
                 <button
-                  onClick={downloadStrip}
+                  onClick={handleDownloadStrip}
                   className="font-bold py-3 px-8 doodle-button transition-colors flex items-center justify-center gap-2 text-lg rotate-1 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 border-gray-800 dark:border-gray-300"
                 >
                   <FaDownload className="w-5 h-5" />

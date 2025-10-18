@@ -93,7 +93,7 @@ export const HomePage = ({
           </div>
 
           {/* Photo Booth Structure */}
-          <div className="mb-0 z-30 relative w-full max-w-xs px-2 sm:px-3 flex flex-col justify-end">
+          <div className="mb-0 z-30 relative w-full max-w-sm px-2 sm:px-3 flex flex-col justify-end">
             {/* Top Sign */}
             <div className="doodle-border-thick p-2 sm:p-2 md:p-3 shadow-2xl sketch-shadow bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
               <h1 className="text-xs sm:text-sm md:text-xl lg:text-2xl font-black text-center leading-tight text-black dark:text-white">
@@ -108,11 +108,20 @@ export const HomePage = ({
             <div className="doodle-border-thick p-2 sm:p-2 md:p-3 shadow-2xl gap-2 sm:gap-2 md:gap-3 flex flex-col bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
               {/* Screen Area - Filter Selection with Preview */}
               <div className="bg-gray-900 doodle-box text-white p-1.5 shadow-inner">
-                <div className="aspect-square bg-black doodle-border flex flex-col items-center justify-center relative overflow-hidden p-2">
-                  {/* Filter Preview Demo */}
-                  <div className="w-full h-full flex flex-col items-center justify-around z-10">
-                    {/* Filter Demo Box */}
-                    <div className="relative">
+                <div className="aspect-[16/12] bg-black doodle-border flex items-center justify-center relative overflow-hidden p-2">
+                  {/* Filter Preview and Navigation */}
+                  <div className="w-full flex justify-between px-2 z-10">
+                    {/* Left Arrow */}
+                    <button
+                      onClick={prevFilter}
+                      className="bg-yellow-400 dark:bg-yellow-600 hover:bg-yellow-500 dark:hover:bg-yellow-700 text-black p-2 sm:p-2 doodle-button flex-shrink-0 cursor-pointer min-h-24"
+                    >
+                      <FaChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+                    </button>
+
+                    {/* Center: Filter Demo and Name */}
+                    <div className="flex flex-col items-center justify-center gap-3 flex-grow mx-2">
+                      {/* Filter Demo Box */}
                       <div
                         className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 doodle-border border-white"
                         style={{ filter: getCSSFilter(selectedFilter) }}
@@ -121,28 +130,20 @@ export const HomePage = ({
                           <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-yellow-400 rounded-full"></div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Filter Navigation */}
-                    <div className="w-full flex items-center justify-between px-3">
-                      <button
-                        onClick={prevFilter}
-                        className="bg-yellow-400 dark:bg-yellow-600 hover:bg-yellow-500 dark:hover:bg-yellow-700 text-black p-1.5 sm:p-2 flex-shrink-0 cursor-pointer"
-                      >
-                        <FaChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
-                      </button>
-
-                      <span className="text-yellow-400 dark:text-yellow-300 px-3 sm:px-4 py-1.5 sm:py-2 border-3 border-black font-bold text-[8px] sm:text-[10px] md:text-xs text-center flex-grow mx-2">
+                      {/* Filter Name */}
+                      <span className="text-yellow-400 dark:text-yellow-300 px-3 sm:px-4 py-1 sm:py-1.5 font-bold text-[8px] sm:text-[10px] md:text-xs text-center">
                         {getFilterName(selectedFilter)}
                       </span>
-
-                      <button
-                        onClick={nextFilter}
-                        className="bg-yellow-400 dark:bg-yellow-600 hover:bg-yellow-500 dark:hover:bg-yellow-700 text-black p-1.5 sm:p-2 flex-shrink-0 cursor-pointer"
-                      >
-                        <FaChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
-                      </button>
                     </div>
+
+                    {/* Right Arrow */}
+                    <button
+                      onClick={nextFilter}
+                      className="bg-yellow-400 dark:bg-yellow-600 hover:bg-yellow-500 dark:hover:bg-yellow-700 text-black p-2 sm:p-2 doodle-button flex-shrink-0 cursor-pointer min-h-24"
+                    >
+                      <FaChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                    </button>
                   </div>
                 </div>
               </div>
