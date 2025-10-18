@@ -1,9 +1,9 @@
 {
-  "name": "pic-a-pal",
+  "name": "pocket-booth",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://crypticsy.github.io/pic-a-pal",
+  "homepage": "https://crypticsy.github.io/pocket-booth",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

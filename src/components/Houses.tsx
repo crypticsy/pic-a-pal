@@ -26,6 +26,10 @@ const generateBuilding = ({ width, height, roofType, windowPattern }: BuildingCo
   const { cols, rows, windowSize } = calculateWindowGrid(width, height);
   const roofWidth = { width: `${width}px` };
 
+  // Assign different wiggle animations to different buildings
+  const wiggleVariants = ['wiggle', 'wiggle-slow', 'wiggle-fast'];
+  const wiggleClass = wiggleVariants[index % wiggleVariants.length];
+
   const roofs = {
     flat: <div className={`h-4 ${COLOR}`} style={roofWidth} />,
     antenna: (
@@ -44,7 +48,14 @@ const generateBuilding = ({ width, height, roofType, windowPattern }: BuildingCo
   };
 
   return (
-    <div key={index} className="flex flex-col items-center" style={{ minWidth: `${width}px` }}>
+    <div
+      key={index}
+      className="flex flex-col items-center"
+      style={{
+        minWidth: `${width}px`,
+        animation: `${wiggleClass} ${3 + (index % 3)}s ease-in-out infinite`
+      }}
+    >
       {roofs[roofType]}
       <div className={`${COLOR} p-2`} style={{ width: `${width}px`, height: `${height}px` }}>
         <div className="h-full flex flex-col justify-between">

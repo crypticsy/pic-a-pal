@@ -1,7 +1,7 @@
 import { FaImage, FaCameraRotate, FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import { LuCoins } from "react-icons/lu";
 import { Footer } from "../components/Footer";
-import { Settings } from "../components/Settings";
+// import { Settings } from "../components/Settings";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { Houses } from "../components/Houses";
 import { Clouds } from "../components/Clouds";
@@ -67,7 +67,7 @@ export const HomePage = ({
   };
 
   return (
-    <div className="h-full w-full relative overflow-hidden touch-none">
+    <div className="h-full w-full relative overflow-hidden touch-none" style={{ height: '100dvh' }}>
       {/* Sky Background */}
       {/* <div className="absolute inset-0 bg-red-200 dark:bg-gray-800"></div> */}
 
@@ -75,10 +75,13 @@ export const HomePage = ({
       {setAppState && <ThemeToggle appState={appState} setAppState={setAppState} />}
 
       {/* Settings Button */}
-      {setAppState && <Settings appState={appState} setAppState={setAppState} />}
+      {/* {setAppState && <Settings appState={appState} setAppState={setAppState} />} */}
 
       {/* Main Scene Container */}
-      <div className="absolute inset-0 flex flex-col safe-area-inset">
+      <div className="absolute inset-0 flex flex-col" style={{
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)'
+      }}>
         {/* Stars (only in dark mode) */}
         <Stars />
 
@@ -86,7 +89,7 @@ export const HomePage = ({
         <Clouds />
 
         {/* Sky Area */}
-        <div className="flex-1 flex items-end justify-center pb-0 relative overflow-visible min-h-0">
+        <div className="flex-1 flex items-end justify-center pb-0 relative overflow-visible min-h-0" style={{ minHeight: 0 }}>
           {/* Houses positioned above ground (farthest back) */}
           <div className="absolute bottom-0 left-0 right-0 z-0">
             <Houses />
@@ -97,10 +100,10 @@ export const HomePage = ({
             {/* Top Sign */}
             <div className="doodle-border-thick p-2 sm:p-2 md:p-3 shadow-2xl sketch-shadow bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
               <h1 className="text-xs sm:text-sm md:text-xl lg:text-2xl font-black text-center leading-tight text-black dark:text-white">
-                Pic-a-Pal
+                Pocket Booth
               </h1>
               <p className="text-center text-[8px] sm:text-[10px] md:text-base font-bold mt-1 sm:mt-1 text-gray-600 dark:text-gray-400 font-micro">
-                Photo Booth
+                Photo Strip
               </p>
             </div>
 

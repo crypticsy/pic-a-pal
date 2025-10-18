@@ -1,6 +1,6 @@
-# Pic-a-Pal Photo Booth
+# Pocket Booth
 
-A classic photo booth application that captures 4 photos and creates an instant strip you can download.
+Your pocket-sized photo booth application that captures instant photo strips you can download.
 
 
 ## Getting Started

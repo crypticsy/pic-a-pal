@@ -70,6 +70,37 @@ const App = () => {
     localStorage.setItem('photoStrips', JSON.stringify(appState.photoStrips));
   }, [appState.photoStrips]);
 
+  // Dynamic viewport height handling for mobile browsers
+  useEffect(() => {
+    const updateViewportHeight = () => {
+      // Get the actual viewport height
+      const vh = window.innerHeight;
+      // Set CSS variable
+      document.documentElement.style.setProperty('--viewport-height', `${vh}px`);
+    };
+
+    // Update on mount
+    updateViewportHeight();
+
+    // Update on resize (for when mobile browser chrome appears/disappears)
+    window.addEventListener('resize', updateViewportHeight);
+    // Update on orientation change
+    window.addEventListener('orientationchange', updateViewportHeight);
+    // Update on scroll (for mobile browser address bar hiding)
+    let scrollTimeout: NodeJS.Timeout;
+    const handleScroll = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(updateViewportHeight, 100);
+    };
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('resize', updateViewportHeight);
+      window.removeEventListener('orientationchange', updateViewportHeight);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   const navigateTo = (page: string) => {
     if (page === currentPage) return;
 

@@ -392,22 +392,32 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
   };
 
   return (
-    <div className="h-full w-full p-4 overflow-y-auto bg-white dark:bg-gray-900 text-black dark:text-white">
+    <div
+      className="w-full overflow-y-auto bg-white dark:bg-gray-900 text-black dark:text-white fixed inset-0"
+      style={{
+        height: 'var(--viewport-height, 100vh)',
+        minHeight: '-webkit-fill-available',
+        paddingTop: 'max(1rem, env(safe-area-inset-top))',
+        paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+        paddingLeft: '1rem',
+        paddingRight: '1rem'
+      }}
+    >
       <div className="max-w-xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-4 sm:mb-6 md:mb-8 gap-2">
           <button
             onClick={() => {
               stopCamera();
               navigateTo('home');
             }}
-            className="transition-colors flex items-center gap-2 doodle-button px-3 py-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300"
+            className="transition-colors flex items-center gap-1 sm:gap-2 doodle-button px-2 py-1.5 sm:px-3 sm:py-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300 flex-shrink-0"
           >
-            <FaArrowLeft className="w-6 h-6" />
-            <span className="text-xs md:text-lg font-bold font-micro">Back</span>
+            <FaArrowLeft className="w-4 h-4 sm:w-6 sm:h-6" />
+            <span className="text-xs sm:text-sm md:text-lg font-bold font-micro hidden sm:inline">Back</span>
           </button>
 
-          <h1 className="text-md md:text-lg font-bold wavy-underline text-center text-black dark:text-white">
+          <h1 className="text-sm sm:text-base md:text-lg font-bold wavy-underline text-center text-black dark:text-white flex-shrink">
             Photo Booth
           </h1>
 
@@ -416,16 +426,17 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
               stopCamera();
               navigateTo('gallery');
             }}
-            className="px-4 py-2 doodle-button transition-colors text-xs md:text-lg font-bold bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300 font-micro"
+            className="px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 doodle-button transition-colors text-xs sm:text-sm md:text-lg font-bold bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300 font-micro flex-shrink-0"
           >
-            Gallery ({appState.photoStrips?.length || 0})
+            <span className="hidden sm:inline">Gallery ({appState.photoStrips?.length || 0})</span>
+            <span className="sm:hidden">({appState.photoStrips?.length || 0})</span>
           </button>
         </div>
 
         {stage === 'loading' && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Camera Loading */}
-            <div className="doodle-border-thick p-6 sketch-shadow rotate-1 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
+            <div className="doodle-border-thick p-3 sm:p-4 md:p-6 sketch-shadow rotate-1 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
               <div className="bg-gray-900 doodle-box p-4 relative">
                 <div className="aspect-square relative overflow-hidden doodle-border">
                   {debugCamera ? (
@@ -464,12 +475,12 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                 </div>
               </div>
 
-              <div className="mt-6 text-center">
-                <p className="text-3xl font-bold animate-pulse text-black dark:text-white">
+              <div className="mt-4 sm:mt-6 text-center">
+                <p className="text-xl sm:text-2xl md:text-3xl font-bold animate-pulse text-black dark:text-white">
                   {debugCamera ? 'DEBUG MODE READY' : 'LOADING CAMERA...'}
                 </p>
                 {appState.myStream && !debugCamera && (
-                  <p className="text-base mt-2 font-semibold text-gray-600 dark:text-gray-400">Stream active: {appState.myStream.active ? 'Yes' : 'No'}</p>
+                  <p className="text-sm sm:text-base mt-2 font-semibold text-gray-600 dark:text-gray-400">Stream active: {appState.myStream.active ? 'Yes' : 'No'}</p>
                 )}
               </div>
             </div>
@@ -477,14 +488,14 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
         )}
 
         {stage === 'countdown' && (
-          <div className="doodle-border-thick p-6 sketch-shadow -rotate-1 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
+          <div className="doodle-border-thick p-3 sm:p-4 md:p-6 sketch-shadow -rotate-1 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
             <div className="bg-gray-900 doodle-box p-4 relative">
               <div className="aspect-square relative overflow-hidden doodle-border">
                 {debugCamera ? (
                   /* Debug Mode Placeholder */
                   <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-500 to-green-500">
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-5">
-                      <div className="text-white text-9xl font-bold animate-pulse">
+                      <div className="text-white text-6xl sm:text-7xl md:text-9xl font-bold animate-pulse">
                         {countdown}
                       </div>
                     </div>
@@ -516,7 +527,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                     )}
 
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-5">
-                      <div className="text-white text-9xl font-bold animate-pulse">
+                      <div className="text-white text-6xl sm:text-7xl md:text-9xl font-bold animate-pulse">
                         {countdown}
                       </div>
                     </div>
@@ -525,8 +536,8 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
               </div>
             </div>
 
-            <div className="mt-4 text-center">
-              <p className="text-3xl font-bold text-black dark:text-white">
+            <div className="mt-3 sm:mt-4 text-center">
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-black dark:text-white">
                 GET READY!
               </p>
             </div>
@@ -534,14 +545,14 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
         )}
 
         {stage === 'capturing' && (
-          <div className="doodle-border-thick p-6 sketch-shadow rotate-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
+          <div className="doodle-border-thick p-3 sm:p-4 md:p-6 sketch-shadow rotate-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
             <div className="bg-gray-900 doodle-box p-4 relative">
               <div className="aspect-square relative overflow-hidden doodle-border">
                 {debugCamera ? (
                   /* Debug Mode Placeholder */
                   <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-orange-500 to-red-500">
-                    <div className="absolute top-8 left-0 right-0 flex justify-center z-5">
-                      <div className="bg-white text-black px-6 py-3 doodle-button font-bold text-xl border-4 border-black">
+                    <div className="absolute top-4 sm:top-6 md:top-8 left-0 right-0 flex justify-center z-5">
+                      <div className="bg-white text-black px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-3 doodle-button font-bold text-sm sm:text-base md:text-xl border-2 sm:border-3 md:border-4 border-black">
                         PHOTO {currentPhotoIndex} OF {photoCount}
                       </div>
                     </div>
@@ -572,8 +583,8 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                       <div className="absolute inset-0 bg-white z-10 pointer-events-none" style={{ animation: 'flash 0.15s ease-out' }} />
                     )}
 
-                    <div className="absolute top-8 left-0 right-0 flex justify-center z-5">
-                      <div className="bg-white text-black px-6 py-3 doodle-button font-bold text-xl border-4 border-black">
+                    <div className="absolute top-4 sm:top-6 md:top-8 left-0 right-0 flex justify-center z-5">
+                      <div className="bg-white text-black px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-3 doodle-button font-bold text-sm sm:text-base md:text-xl border-2 sm:border-3 md:border-4 border-black">
                         PHOTO {currentPhotoIndex} OF {photoCount}
                       </div>
                     </div>
@@ -582,11 +593,11 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
               </div>
             </div>
 
-            <div className={`mt-4 grid gap-2`} style={{ gridTemplateColumns: `repeat(${photoCount}, minmax(0, 1fr))` }}>
+            <div className={`mt-3 sm:mt-4 grid gap-1.5 sm:gap-2`} style={{ gridTemplateColumns: `repeat(${photoCount}, minmax(0, 1fr))` }}>
               {Array.from({ length: photoCount }, (_, i) => i + 1).map((num) => (
                 <div
                   key={num}
-                  className={`h-3 doodle-border ${
+                  className={`h-2 sm:h-3 doodle-border ${
                     num < currentPhotoIndex
                       ? 'bg-black'
                       : num === currentPhotoIndex
@@ -600,13 +611,13 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
         )}
 
         {stage === 'complete' && photoStrip && (
-          <div className="space-y-6">
-            <div className="doodle-border-thick p-6 sketch-shadow -rotate-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
-              <h2 className="text-4xl font-bold mb-4 text-center wavy-underline text-black dark:text-white">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="doodle-border-thick p-3 sm:p-4 md:p-6 sketch-shadow -rotate-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 text-center wavy-underline text-black dark:text-white">
                 YOUR PHOTO STRIP!
               </h2>
 
-              <div className="max-w-[240px] mx-auto bg-gray-100 doodle-box p-3 shadow-2xl max-h-[500px] overflow-y-auto">
+              <div className="max-w-[200px] sm:max-w-[240px] mx-auto bg-gray-100 doodle-box p-2 sm:p-3 shadow-2xl max-h-[400px] sm:max-h-[500px] overflow-y-auto">
                 <div className="space-y-2">
                   {photoStrip.photos.map((photo, index) => (
                     <img
@@ -619,20 +630,20 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                 </div>
               </div>
 
-              <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                 <button
                   onClick={handleDownloadStrip}
-                  className="font-bold py-3 px-8 doodle-button transition-colors flex items-center justify-center gap-2 text-lg rotate-1 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 border-gray-800 dark:border-gray-300"
+                  className="font-bold py-2 px-4 sm:py-2.5 sm:px-6 md:py-3 md:px-8 text-sm sm:text-base md:text-lg doodle-button transition-colors flex items-center justify-center gap-2 rotate-1 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 border-gray-800 dark:border-gray-300"
                 >
-                  <FaDownload className="w-5 h-5" />
+                  <FaDownload className="w-4 h-4 sm:w-5 sm:h-5" />
                   Download Strip
                 </button>
 
                 <button
                   onClick={reset}
-                  className="font-bold py-3 px-8 doodle-button transition-colors flex items-center justify-center gap-2 text-lg -rotate-1 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300"
+                  className="font-bold py-2 px-4 sm:py-2.5 sm:px-6 md:py-3 md:px-8 text-sm sm:text-base md:text-lg doodle-button transition-colors flex items-center justify-center gap-2 -rotate-1 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300"
                 >
-                  <FaCamera className="w-5 h-5" />
+                  <FaCamera className="w-4 h-4 sm:w-5 sm:h-5" />
                   Take Another
                 </button>
               </div>
