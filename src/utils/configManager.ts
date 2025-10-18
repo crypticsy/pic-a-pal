@@ -2,7 +2,7 @@
  * Configuration Manager
  *
  * Handles key-based configuration via URL parameters and session management.
- * When a URL has ?mode=key&key=VALUE, it looks up the configuration in environment
+ * When a URL has ?key=VALUE, it looks up the configuration in environment
  * variables and stores it in sessionStorage.
  */
 
@@ -21,7 +21,6 @@ export interface GoogleDriveConfig {
  */
 export const initializeConfigFromURL = (): void => {
   const urlParams = new URLSearchParams(window.location.search);
-  const mode = urlParams.get('mode');
   const key = urlParams.get('key');
 
   // Get current URL without query params
@@ -37,8 +36,8 @@ export const initializeConfigFromURL = (): void => {
   // Store current base URL
   sessionStorage.setItem(SESSION_URL_NAME, currentBaseURL);
 
-  // Check if URL contains mode=key&key=VALUE
-  if (mode === 'key' && key) {
+  // Check if URL contains key=VALUE
+  if (key) {
     const configKey = key.toUpperCase();
     const envVarName = `VITE_CONFIG_${configKey}`;
 
