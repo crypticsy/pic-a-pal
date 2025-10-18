@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FaCamera, FaArrowLeft, FaDownload } from 'react-icons/fa6';
 import { Footer } from '../components/Footer';
 import { uploadPhotoToGoogleDrive, isGoogleDriveEnabled } from '../utils/googleDrive';
+import { FilterType, getCSSFilter, applyCanvasFilter } from '../utils/filters';
 
 type PhotoBoothProps = {
   navigateTo: (route: string) => void;
@@ -31,6 +32,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
   const cameraFacing = appState?.cameraFacing || 'user';
   const shouldMirror = cameraFacing === 'user';
   const debugCamera = appState?.debugCamera || false;
+  const selectedFilter = (appState?.selectedFilter as FilterType) || 'normal';
 
   useEffect(() => {
     let streamRef: MediaStream | null = null;
@@ -326,6 +328,9 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
     // Reset transformation
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 
+    // Apply selected filter to the canvas
+    applyCanvasFilter(canvas, selectedFilter);
+
     return canvas.toDataURL('image/jpeg', 0.9);
   };
 
@@ -481,7 +486,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
     <div className="h-full w-full p-4 overflow-y-auto bg-white dark:bg-gray-900 text-black dark:text-white">
       <div className="max-w-xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-8">
           <button
             onClick={() => {
               stopCamera();
@@ -537,7 +542,8 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                         minHeight: '100%',
                         width: 'auto',
                         height: 'auto',
-                        objectFit: 'cover'
+                        objectFit: 'cover',
+                        filter: getCSSFilter(selectedFilter)
                       }}
                       className="bg-black"
                     />
@@ -590,7 +596,8 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                         minHeight: '100%',
                         width: 'auto',
                         height: 'auto',
-                        objectFit: 'cover'
+                        objectFit: 'cover',
+                        filter: getCSSFilter(selectedFilter)
                       }}
                       className="bg-black"
                     />
@@ -646,7 +653,8 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                         minHeight: '100%',
                         width: 'auto',
                         height: 'auto',
-                        objectFit: 'cover'
+                        objectFit: 'cover',
+                        filter: getCSSFilter(selectedFilter)
                       }}
                       className="bg-black"
                     />
@@ -689,7 +697,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                 YOUR PHOTO STRIP!
               </h2>
 
-              <div className="max-w-md mx-auto bg-gray-100 doodle-box p-4 shadow-2xl max-h-[600px] overflow-y-auto">
+              <div className="max-w-[240px] mx-auto bg-gray-100 doodle-box p-3 shadow-2xl max-h-[500px] overflow-y-auto">
                 <div className="space-y-2">
                   {photoStrip.photos.map((photo, index) => (
                     <img

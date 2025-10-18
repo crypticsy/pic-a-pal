@@ -159,12 +159,6 @@ export const Settings = ({ }: SettingsProps) => {
                 >
                   {isKeyBased ? "Settings Locked (URL Key Active)" : "Save Google Drive Settings"}
                 </button>
-
-                {!isKeyBased && (
-                  <p className="text-xs mt-2 text-gray-600 dark:text-gray-400 font-micro">
-                    See README for setup instructions
-                  </p>
-                )}
               </div>
             </div>
 

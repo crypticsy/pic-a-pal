@@ -5,7 +5,7 @@ export const Footer = () => {
         href="https://github.com/crypticsy"
         target="_blank"
         rel="noopener noreferrer"
-        className="text-slate-200 dark:text-slate-400 text-[5px] md:text-[8.5px] font-bold "
+        className="text-slate-200 dark:text-slate-400 text-[5px] md:text-xs font-bold "
       >
         Created by Crypticsy
       </a>
