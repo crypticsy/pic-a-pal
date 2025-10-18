@@ -2,6 +2,8 @@ import { StrictMode, useState, useRef, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import { GalleryPage, HomePage, PhotoBoothPage } from './pages';
+import { initGoogleDrive } from './utils/googleDrive';
+import { initializeConfigFromURL } from './utils/configManager';
 
 // Main App Component with Routing
 const App = () => {
@@ -25,6 +27,17 @@ const App = () => {
   // Handle initial load fade-in
   useEffect(() => {
     setTimeout(() => setIsInitialLoad(false), 100);
+  }, []);
+
+  // Initialize configuration from URL and Google Drive API on app load
+  useEffect(() => {
+    // First, parse URL parameters and set up key-based config if present
+    initializeConfigFromURL();
+
+    // Then initialize Google Drive API with the loaded configuration
+    initGoogleDrive().catch(error => {
+      console.error('Failed to initialize Google Drive:', error);
+    });
   }, []);
 
   // Apply theme to document and save to local storage

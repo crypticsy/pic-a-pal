@@ -87,7 +87,7 @@ export const GalleryPage = ({ navigateTo, appState, setAppState }: GalleryPagePr
           </button>
 
           <h1 className="text-3xl font-bold wavy-underline text-black dark:text-white">
-            PHOTO GALLERY
+            Photo Gallery
           </h1>
 
           <div className="text-lg font-bold px-3 py-2 doodle-border bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">

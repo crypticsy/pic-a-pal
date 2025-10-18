@@ -2,6 +2,7 @@ import { FaImage, FaCameraRotate } from "react-icons/fa6";
 import { LuCoins } from "react-icons/lu";
 import { Footer } from "../components/Footer";
 import { Settings } from "../components/Settings";
+import { ThemeToggle } from "../components/ThemeToggle";
 import { Houses } from "../components/Houses";
 import { Clouds } from "../components/Clouds";
 import { Stars } from "../components/Stars";
@@ -45,15 +46,18 @@ export const HomePage = ({
   };
 
   return (
-    <div className="h-full w-full relative overflow-hidden">
+    <div className="h-full w-full relative overflow-hidden touch-none">
       {/* Sky Background */}
       {/* <div className="absolute inset-0 bg-red-200 dark:bg-gray-800"></div> */}
+
+      {/* Theme Toggle */}
+      {setAppState && <ThemeToggle appState={appState} setAppState={setAppState} />}
 
       {/* Settings Button */}
       {setAppState && <Settings appState={appState} setAppState={setAppState} />}
 
       {/* Main Scene Container */}
-      <div className="absolute inset-0 flex flex-col">
+      <div className="absolute inset-0 flex flex-col safe-area-inset">
         {/* Stars (only in dark mode) */}
         <Stars />
 
@@ -61,26 +65,28 @@ export const HomePage = ({
         <Clouds />
 
         {/* Sky Area */}
-        <div className="flex-1 flex items-end justify-center pb-0 relative overflow-visible">
-          {/* Houses positioned above ground (farthest back) */}
-          <div className="absolute bottom-0 left-0 right-0 z-0">
-            <Houses />
-          </div>
+        <div className="flex-1 flex items-end justify-center pb-0 relative overflow-visible min-h-0">
+          {/* Houses positioned above ground (farthest back) - Hidden on mobile */}
+          {!isMobile && (
+            <div className="absolute bottom-0 left-0 right-0 z-0">
+              <Houses />
+            </div>
+          )}
 
           {/* Photo Booth Structure */}
-          <div className="mb-0 z-30 relative">
+          <div className="mb-0 z-30 relative w-full max-w-md px-2 sm:px-4 flex flex-col justify-end">
             {/* Top Sign */}
-            <div className="doodle-border-thick p-2 sm:p-3 md:p-4 shadow-2xl sketch-shadow mx-6 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
-              <h1 className="text-sm sm:text-base md:text-xl lg:text-2xl font-black text-center leading-tight text-black dark:text-white">
-                PIC-A-PAL
+            <div className="doodle-border-thick p-2 sm:p-3 md:p-4 shadow-2xl sketch-shadow bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
+              <h1 className="text-sm sm:text-base md:text-2xl lg:text-3xl font-black text-center leading-tight text-black dark:text-white">
+                Pic-a-Pal
               </h1>
-              <p className="text-center text-[8px] sm:text-xs md:text-sm font-bold mt-1 sm:mt-2 text-gray-600 dark:text-gray-400">
-                PHOTO BOOTH
+              <p className="text-center text-[8px] sm:text-xs md:text-lg font-bold mt-1 sm:mt-2 text-gray-600 dark:text-gray-400 font-micro">
+                Photo Booth
               </p>
             </div>
 
             {/* Main Booth Body */}
-            <div className="doodle-border-thick p-2 sm:p-3 md:p-4 shadow-2xl gap-4 flex flex-col bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
+            <div className="doodle-border-thick p-2 sm:p-3 md:p-4 shadow-2xl gap-2 sm:gap-3 md:gap-4 flex flex-col bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
               {/* Screen Area */}
               <div className="bg-gray-900 doodle-box text-white p-2 shadow-inner">
                 <div className="aspect-square bg-black doodle-border flex items-center justify-center relative overflow-hidden">
@@ -92,7 +98,7 @@ export const HomePage = ({
                     <p className="text-white text-xs sm:text-sm md:text-base font-bold mb-1 leading-tight">
                       READY!
                     </p>
-                    <p className="text-gray-300 text-[8px] sm:text-xs md:text-sm font-semibold leading-tight">
+                    <p className="text-gray-300 text-[8px] sm:text-xs md:text-sm font-semibold leading-tight font-micro">
                       INSERT COIN
                     </p>
                   </div>
@@ -108,10 +114,10 @@ export const HomePage = ({
                     className="bg-yellow-500 hover:bg-yellow-600 text-black font-black py-3 sm:py-4 md:py-6 px-1 sm:px-2 doodle-button shadow-xl flex flex-col items-center justify-center gap-1 cursor-pointer"
                   >
                     <LuCoins className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 animate-pulse" />
-                    <span className="text-[8px] sm:text-xs md:text-sm leading-tight">
+                    <span className="text-[8px] sm:text-xs md:text-sm leading-tight font-micro">
                       INSERT
                     </span>
-                    <span className="text-[8px] sm:text-xs md:text-sm leading-tight">
+                    <span className="text-[8px] sm:text-xs md:text-sm leading-tight font-micro">
                       COIN
                     </span>
                   </button>
@@ -122,10 +128,10 @@ export const HomePage = ({
                     className="bg-white hover:bg-gray-100 text-black font-black py-3 sm:py-4 md:py-6 px-1 sm:px-2 doodle-button shadow-xl flex flex-col items-center justify-center gap-1 cursor-pointer"
                   >
                     <FaImage className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8" />
-                    <span className="text-[8px] sm:text-xs md:text-sm leading-tight">
+                    <span className="text-[8px] sm:text-xs md:text-sm leading-tight font-micro">
                       GALLERY
                     </span>
-                    <span className="text-[8px] sm:text-xs leading-tight">
+                    <span className="text-[8px] sm:text-xs leading-tight font-micro">
                       ({photoStripCount})
                     </span>
                   </button>
@@ -134,7 +140,7 @@ export const HomePage = ({
 
               {/* Photo Count Selector */}
               <div className="bg-slate-300 doodle-border text-black p-2">
-                <p className="text-black text-center text-[8px] sm:text-xs md:text-sm font-bold leading-tight mb-1 sm:mb-2">
+                <p className="text-black text-center text-[8px] sm:text-xs md:text-sm font-bold leading-tight mb-1 sm:mb-2 font-micro">
                   Strip Length
                 </p>
                 <div className="grid grid-cols-4 gap-1">
@@ -162,7 +168,7 @@ export const HomePage = ({
               {/* Camera Selection (Mobile Only) */}
               {isMobile && (
                 <div className="bg-blue-100 doodle-border text-black p-2">
-                  <p className="text-black text-center text-[8px] sm:text-xs md:text-sm font-bold leading-tight mb-1 sm:mb-2">
+                  <p className="text-black text-center text-[8px] sm:text-xs md:text-sm font-bold leading-tight mb-1 sm:mb-2 font-micro">
                     Camera
                   </p>
                   <button
@@ -170,7 +176,7 @@ export const HomePage = ({
                     className="w-full bg-white hover:bg-gray-100 text-black font-black py-2 sm:py-3 px-2 doodle-button shadow-xl flex items-center justify-center gap-2"
                   >
                     <FaCameraRotate className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span className="text-[8px] sm:text-xs md:text-sm leading-tight">
+                    <span className="text-[8px] sm:text-xs md:text-sm leading-tight font-micro">
                       {cameraFacing === "user" ? "FRONT" : "BACK"}
                     </span>
                   </button>
@@ -186,7 +192,7 @@ export const HomePage = ({
         </div>
 
         {/* Ground Area - base only */}
-        <div className="h-10 sm:h-12 md:h-14 bg-gray-500 dark:bg-slate-950 border-y-0 relative"></div>
+        <div className="h-8 sm:h-10 md:h-12 lg:h-14 bg-gray-500 dark:bg-slate-950 border-y-0 relative flex-shrink-0"></div>
       </div>
 
       <Footer />

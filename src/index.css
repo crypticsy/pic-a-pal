@@ -4,12 +4,51 @@
 
 body, html {
   overflow: hidden;
+  margin: 0;
+  padding: 0;
+  /* Use dvh (dynamic viewport height) for mobile browsers to account for browser chrome */
+  height: 100dvh;
+  /* Fallback for older browsers */
   height: 100vh;
   width: 100vw;
-  font-family: 'Press Start 2P', cursive;
+  font-family: 'Pixelify Sans', cursive, sans-serif;
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
+  /* Prevent pull-to-refresh on mobile */
+  overscroll-behavior: none;
+}
+
+/* Root app container */
+#root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  /* Account for safe areas (notches, bottom bars) */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Font utilities */
+.font-micro {
+  font-family: 'Micro 5', monospace;
+}
+
+/* Mobile-specific utilities */
+@supports (height: 100dvh) {
+  body, html {
+    height: 100dvh;
+  }
+}
+
+/* Prevent iOS Safari bounce effect */
+@media (max-width: 768px) {
+  body {
+    position: fixed;
+    width: 100%;
+  }
 }
 
 @keyframes flash {
@@ -293,4 +332,18 @@ body, html {
 
 .animate-fly {
   animation: fly 15s linear infinite;
+}
+
+/* Slow spin animation for sun */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
 }
