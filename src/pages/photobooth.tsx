@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { FaCamera, FaArrowLeft, FaDownload } from 'react-icons/fa6';
 import { Footer } from '../components/Footer';
-import { uploadPhotoToGoogleDrive, isGoogleDriveEnabled } from '../utils/googleDriveUpload';
 import { FilterType, getCSSFilter, applyCanvasFilter } from '../utils/filters';
-import { createPhotoStripCanvas, downloadPhotoStrip } from '../utils/photostrip';
+import { downloadPhotoStrip } from '../utils/photostrip';
 import { incrementPhotoCount } from '../utils/configManager';
 
 type PhotoBoothProps = {
@@ -334,21 +333,6 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
 
     // Stop camera after photos are taken
     stopCamera();
-
-    // Auto-upload to Google Drive if enabled
-    if (isGoogleDriveEnabled()) {
-      try {
-        // Create a composite photo strip image
-        const compositeImage = await createPhotoStripCanvas(photos);
-        const filename = `photo-strip-${strip.id}.jpg`;
-        const result = await uploadPhotoToGoogleDrive(compositeImage, filename);
-        if (result.success) {
-          console.log('Photo strip automatically uploaded to Google Drive:', result);
-        }
-      } catch (error) {
-        console.error('Failed to auto-upload to Google Drive:', error);
-      }
-    }
 
     setStage('complete');
   };

@@ -6,11 +6,4 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   base: "/pocket-booth/",
-  build: {
-    rollupOptions: {
-      external: [
-        /^node:.*/,  // Exclude all node: imports
-      ],
-    },
-  },
 });

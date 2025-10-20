@@ -1,6 +1,6 @@
 # Pocket Booth 📸
 
-Your pocket-sized photo booth application that captures instant photo strips with automatic cloud storage backup.
+Your pocket-sized photo booth application that captures instant photo strips with local storage.
 
 ## ✨ Features
 
@@ -8,33 +8,34 @@ Your pocket-sized photo booth application that captures instant photo strips wit
 - 🎨 **Multiple Filters** - Black & White, Trippy, Blue Tint, and more
 - 🌙 **Dark Mode** - Beautiful dark theme support
 - 📱 **Mobile Optimized** - Works great on phones and tablets
-- ☁️ **Cloud Backup** - Automatic upload to Google Drive
 - 🔒 **Photo Limits** - Configurable limits per event/key
 - 🎯 **Instagram Detection** - Warns users to open in regular browser
 - 💾 **Offline Gallery** - View all photos in local storage
+- ⬇️ **Download Photos** - Save photo strips as JPEG files
 
 ---
 
 ## 🚀 Quick Start
 
-Choose your deployment method:
+### GitHub Pages Deployment (Recommended)
+**Free hosting with local browser storage**
 
-### Option 1: GitHub Pages + Vercel (Recommended)
-**Free hosting with Google Drive storage**
+```bash
+# Install dependencies
+npm install
 
-📖 **[Follow the Complete Deployment Guide →](./DEPLOYMENT_GUIDE.md)**
+# Build and deploy to GitHub Pages
+npm run deploy
+```
 
-- ✅ Free hosting on GitHub Pages
-- ✅ Serverless API on Vercel
-- ✅ Free Google Drive storage (15GB)
-
-### Option 2: Local Development Only
-Just testing or developing locally
+### Local Development
 
 ```bash
 npm install
 npm run dev
 ```
+
+Visit `http://localhost:5173`
 
 ---
 
@@ -54,7 +55,7 @@ npm run dev
 3. **Download & Share**
    - View your photo strip
    - Download as JPEG
-   - Photos auto-upload to cloud (if configured)
+   - Photos saved in browser's local storage
 
 4. **Gallery**
    - Access all saved photo strips
@@ -73,28 +74,37 @@ npm run dev
 
 ### Environment Variables
 
-Create `.env.production` for production deployment:
+Create `.env` file for development or production:
 
 ```bash
-# API endpoint (your Vercel serverless function)
-VITE_API_BASE_URL=https://your-api.vercel.app/api
+# Key-Based Photo Limit Configuration
+# Format: VITE_CONFIG_[KEY_NAME]=[photoLimit]
 
-# Event configuration
-# Format: enabled,folderId,photoLimit
-VITE_CONFIG_USER=true,1a2b3c4d5e6f7g8h9i0j,5
+# Example configurations:
+VITE_CONFIG_MYEVENT=10
+VITE_CONFIG_WEDDING=5
+VITE_CONFIG_BIRTHDAY=20
+VITE_CONFIG_DEMO=3
+VITE_CONFIG_UNLIMITED=
 ```
 
-### Multiple Events
+### Multiple Events/Keys
 
-Configure different settings for different events:
+Configure different photo limits for different events:
 
 ```bash
-VITE_CONFIG_WEDDING=true,folder-id-wedding,10
-VITE_CONFIG_BIRTHDAY=true,folder-id-birthday,20
-VITE_CONFIG_CORPORATE=true,folder-id-corporate,50
+VITE_CONFIG_WEDDING=10
+VITE_CONFIG_BIRTHDAY=20
+VITE_CONFIG_CORPORATE=50
 ```
 
-Access with: `https://yoursite.com/?key=wedding`
+Access with: `https://yoursite.com/pocket-booth/?key=wedding`
+
+**How it works:**
+- User opens the app with a key parameter in the URL
+- The app loads the photo limit from environment variables
+- Photos taken are tracked per key in localStorage
+- When limit is reached, the "INSERT COIN" button is disabled
 
 ---
 
@@ -103,22 +113,16 @@ Access with: `https://yoursite.com/?key=wedding`
 ```
 ┌─────────────────┐
 │  GitHub Pages   │  Static website hosting (free)
-│   (Frontend)    │
-└────────┬────────┘
+│   (Frontend)    │  - React + Vite
+└────────┬────────┘  - Camera API
          │
-         │ POST /api/upload-photo
+         │ localStorage
          ▼
 ┌─────────────────┐
-│     Vercel      │  Serverless functions
-│      (API)      │  - Upload to Google Drive
-└────────┬────────┘  - Service account auth
-         │
-         │ Google Drive API
-         ▼
-┌─────────────────┐
-│  Google Drive   │  Photo storage
-│     Folder      │  - 15GB free
-└─────────────────┘  - Organized by event
+│  Browser        │  Local storage
+│  localStorage   │  - Photo strips (base64)
+└─────────────────┘  - Gallery data
+                     - Photo count per key
 ```
 
 ---
@@ -163,3 +167,34 @@ npm run preview
 # Deploy to GitHub Pages
 npm run deploy
 ```
+
+---
+
+## 📝 Tech Stack
+
+- **React 19** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **Tailwind CSS** - Styling
+- **MediaDevices API** - Camera access
+- **Canvas API** - Image processing
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+---
+
+## 📄 License
+
+MIT License - feel free to use this project for personal or commercial purposes.
+
+---
+
+## 🙏 Acknowledgments
+
+- Inspired by classic photo booth machines
+- Built with modern web technologies
+- Designed for simplicity and ease of use

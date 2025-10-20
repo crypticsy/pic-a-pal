@@ -9,9 +9,7 @@
 const SESSION_KEY_NAME = 'picapal_config_key';
 const SESSION_URL_NAME = 'picapal_session_url';
 
-export interface GoogleDriveConfig {
-  enabled: boolean;
-  folderId: string; // Google Drive folder ID (optional)
+export interface SessionConfig {
   isKeyBased: boolean;
   photoLimit?: number; // Maximum number of photo strips allowed (undefined = unlimited)
 }
@@ -71,42 +69,42 @@ export const isKeyBasedConfig = (): boolean => {
 
 /**
  * Parse configuration string from environment variable
- * Format: "enabled,folderId,photoLimit"
+ * Format: "photoLimit" (just a number, or empty for unlimited)
  */
-const parseConfigString = (configString: string): Omit<GoogleDriveConfig, 'isKeyBased'> | null => {
-  if (!configString) return null;
+const parseConfigString = (configString: string): Omit<SessionConfig, 'isKeyBased'> | null => {
+  if (!configString) return { photoLimit: undefined };
 
-  const parts = configString.split(',').map(part => part.trim());
+  const trimmed = configString.trim();
 
-  if (parts.length < 2 || parts.length > 3) {
-    console.error('Invalid config format. Expected: enabled,folderId[,photoLimit]');
+  // If empty, unlimited photos
+  if (trimmed === '') {
+    return { photoLimit: undefined };
+  }
+
+  // Parse as number
+  const photoLimit = parseInt(trimmed, 10);
+
+  if (isNaN(photoLimit) || photoLimit < 0) {
+    console.error('Invalid config format. Expected: a positive number or empty for unlimited');
     return null;
   }
 
-  const [enabledStr, folderId, photoLimitStr] = parts;
-  const enabled = enabledStr.toLowerCase() === 'true';
-  const photoLimit = photoLimitStr && photoLimitStr !== '' ? parseInt(photoLimitStr, 10) : undefined;
-
   return {
-    enabled,
-    folderId: folderId || '',
-    photoLimit: photoLimit && !isNaN(photoLimit) ? photoLimit : undefined,
+    photoLimit: photoLimit || undefined,
   };
 };
 
 /**
- * Get Google Drive configuration based on priority:
- * 1. URL key-based config (from environment)
- * 2. Manual localStorage config (from Settings UI)
+ * Get session configuration based on URL key parameter
  */
-export const getGoogleDriveConfig = (): GoogleDriveConfig => {
-  // Priority 1: Check for key-based configuration
+export const getSessionConfig = (): SessionConfig => {
+  // Check for key-based configuration
   const configKey = getCurrentConfigKey();
   if (configKey) {
     const envVarName = `VITE_CONFIG_${configKey.toUpperCase()}`;
     const configValue = (import.meta.env as any)[envVarName];
 
-    if (configValue) {
+    if (configValue !== undefined) {
       const parsedConfig = parseConfigString(configValue);
       if (parsedConfig) {
         return {
@@ -117,23 +115,10 @@ export const getGoogleDriveConfig = (): GoogleDriveConfig => {
     }
   }
 
-  // Priority 2: Check localStorage (manual configuration from Settings UI)
-  const localEnabled = localStorage.getItem('googleDriveEnabled') === 'true';
-  const localFolderId = localStorage.getItem('googleDriveFolderId') || '';
-
-  if (localEnabled) {
-    return {
-      enabled: localEnabled,
-      folderId: localFolderId,
-      isKeyBased: false,
-    };
-  }
-
-  // No configuration found - return disabled state
+  // No configuration found - return default state (unlimited)
   return {
-    enabled: false,
-    folderId: '',
     isKeyBased: false,
+    photoLimit: undefined,
   };
 };
 
@@ -179,7 +164,7 @@ export const incrementPhotoCount = (): void => {
  * Returns true if limit is reached, false otherwise
  */
 export const hasReachedPhotoLimit = (): boolean => {
-  const config = getGoogleDriveConfig();
+  const config = getSessionConfig();
 
   // If no photo limit is set, user can take unlimited photos
   if (!config.photoLimit) {
@@ -195,7 +180,7 @@ export const hasReachedPhotoLimit = (): boolean => {
  * Returns undefined if there's no limit
  */
 export const getPhotosRemaining = (): number | undefined => {
-  const config = getGoogleDriveConfig();
+  const config = getSessionConfig();
 
   if (!config.photoLimit) {
     return undefined;
