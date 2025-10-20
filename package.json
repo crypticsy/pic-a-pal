@@ -5,7 +5,7 @@
   "type": "module",
   "homepage": "https://crypticsy.github.io/pocket-booth",
   "engines": {
-    "node": "22.x"
+    "node": ">=18.x"
   },
   "scripts": {
     "dev": "vite",

@@ -56,9 +56,10 @@ async function uploadToDrive(
     fileMetadata.parents = [folderId];
   }
 
+  const { Readable } = require('stream');
   const media = {
     mimeType: 'image/jpeg',
-    body: require('stream').Readable.from(fileBuffer),
+    body: Readable.from(fileBuffer),
   };
 
   const response = await drive.files.create({
