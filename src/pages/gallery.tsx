@@ -1,5 +1,7 @@
 import { FaCamera, FaDownload, FaImage, FaArrowLeft, FaTrash } from 'react-icons/fa6';
+import { useState } from 'react';
 import { Footer } from '../components/Footer';
+import { InstagramModal } from '../components/InstagramModal';
 import { downloadPhotoStrip } from '../utils/photostrip';
 
 type PhotoStripType = {
@@ -17,8 +19,14 @@ type GalleryPageProps = {
 
 // Gallery Page Component
 export const GalleryPage = ({ navigateTo, appState, setAppState }: GalleryPageProps) => {
-  const handleDownload = (strip: PhotoStripType) => {
-    downloadPhotoStrip(strip.photos, `photo-strip-${strip.id}.jpg`);
+  const [showInstagramModal, setShowInstagramModal] = useState(false);
+
+  const handleDownload = async (strip: PhotoStripType) => {
+    const success = await downloadPhotoStrip(strip.photos, `photo-strip-${strip.id}.jpg`);
+    if (!success) {
+      // Show Instagram modal if download wasn't possible
+      setShowInstagramModal(true);
+    }
   };
 
   const deleteStrip = (stripId: number) => {
@@ -137,6 +145,11 @@ export const GalleryPage = ({ navigateTo, appState, setAppState }: GalleryPagePr
       </div>
 
       <Footer />
+
+      {/* Instagram Browser Modal */}
+      {showInstagramModal && (
+        <InstagramModal onClose={() => setShowInstagramModal(false)} />
+      )}
     </div>
   );
 };

@@ -6,8 +6,10 @@ import { ThemeToggle } from "../components/ThemeToggle";
 import { Houses } from "../components/Houses";
 import { Clouds } from "../components/Clouds";
 import { Stars } from "../components/Stars";
+import { InstagramModal } from "../components/InstagramModal";
 import { useState, useEffect } from "react";
 import { FilterType, getFilterName, getCSSFilter } from "../utils/filters";
+import { isInstagramBrowser } from "../utils/photostrip";
 
 // Home Page Component
 type HomePageProps = {
@@ -24,6 +26,7 @@ export const HomePage = ({
   const photoStripCount = appState?.photoStrips?.length || 0;
   const photoCount = appState?.photoCount || 4;
   const [isMobile, setIsMobile] = useState(false);
+  const [showInstagramModal, setShowInstagramModal] = useState(false);
   const cameraFacing = appState?.cameraFacing || "user";
   const selectedFilter = (appState?.selectedFilter as FilterType) || "normal";
 
@@ -38,6 +41,13 @@ export const HomePage = ({
       setIsMobile(isMobileDevice);
     };
     checkMobile();
+  }, []);
+
+  // Detect Instagram browser and show modal
+  useEffect(() => {
+    if (isInstagramBrowser()) {
+      setShowInstagramModal(true);
+    }
   }, []);
 
   const toggleCamera = () => {
@@ -242,6 +252,11 @@ export const HomePage = ({
       </div>
 
       <Footer />
+
+      {/* Instagram Browser Modal */}
+      {showInstagramModal && (
+        <InstagramModal onClose={() => setShowInstagramModal(false)} />
+      )}
     </div>
   );
 };

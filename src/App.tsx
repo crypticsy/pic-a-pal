@@ -87,7 +87,7 @@ const App = () => {
     // Update on orientation change
     window.addEventListener('orientationchange', updateViewportHeight);
     // Update on scroll (for mobile browser address bar hiding)
-    let scrollTimeout: NodeJS.Timeout;
+    let scrollTimeout: ReturnType<typeof setTimeout>;
     const handleScroll = () => {
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(updateViewportHeight, 100);
