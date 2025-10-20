@@ -68,6 +68,10 @@ body, html {
   font-family: 'Press Start 2P', cursive, monospace;
 }
 
+.font-tiny5 {
+  font-family: 'Tiny5', monospace;
+}
+
 /* Mobile-specific utilities */
 @supports (height: 100dvh) {
   body, html {

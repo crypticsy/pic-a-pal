@@ -1,7 +1,6 @@
 import { FaImage, FaCameraRotate, FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import { LuCoins } from "react-icons/lu";
 import { Footer } from "../components/Footer";
-// import { Settings } from "../components/Settings";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { Houses } from "../components/Houses";
 import { Clouds } from "../components/Clouds";
@@ -10,6 +9,7 @@ import { InstagramModal } from "../components/InstagramModal";
 import { useState, useEffect } from "react";
 import { FilterType, getFilterName, getCSSFilter } from "../utils/filters";
 import { isInstagramBrowser } from "../utils/photostrip";
+import { getPhotosRemaining, hasReachedPhotoLimit, isKeyBasedConfig } from "../utils/configManager";
 
 // Home Page Component
 type HomePageProps = {
@@ -29,6 +29,11 @@ export const HomePage = ({
   const [showInstagramModal, setShowInstagramModal] = useState(false);
   const cameraFacing = appState?.cameraFacing || "user";
   const selectedFilter = (appState?.selectedFilter as FilterType) || "normal";
+
+  // Photo limit tracking
+  const photosRemaining = getPhotosRemaining();
+  const isLimitReached = hasReachedPhotoLimit();
+  const isKeyBased = isKeyBasedConfig();
 
   // Detect if device is mobile
   useEffect(() => {
@@ -166,15 +171,20 @@ export const HomePage = ({
                 <div className="grid grid-cols-2 gap-1 sm:gap-1.5">
                   {/* Insert Coin Button - Left */}
                   <button
-                    onClick={() => navigateTo("photobooth")}
-                    className="bg-yellow-400 dark:bg-yellow-500 hover:bg-yellow-500 dark:hover:bg-yellow-600 text-black font-black py-2 sm:py-3 md:py-4 px-1 sm:px-1.5 doodle-button shadow-xl flex flex-col items-center justify-center gap-0.5 cursor-pointer"
+                    onClick={() => !isLimitReached && navigateTo("photobooth")}
+                    disabled={isLimitReached}
+                    className={`font-black py-2 sm:py-3 md:py-4 px-1 sm:px-1.5 doodle-button shadow-xl flex flex-col items-center justify-center gap-0.5 ${
+                      isLimitReached
+                        ? 'bg-gray-400 dark:bg-gray-600 text-gray-700 dark:text-gray-400 cursor-not-allowed opacity-60'
+                        : 'bg-yellow-400 dark:bg-yellow-500 hover:bg-yellow-500 dark:hover:bg-yellow-600 text-black cursor-pointer'
+                    }`}
                   >
-                    <LuCoins className="w-3 h-3 sm:w-5 sm:h-5 md:w-6 md:h-6 animate-pulse" />
+                    <LuCoins className={`w-3 h-3 sm:w-5 sm:h-5 md:w-6 md:h-6 ${!isLimitReached && 'animate-pulse'}`} />
                     <span className="text-[7px] sm:text-[10px] md:text-xs leading-tight font-micro">
-                      INSERT
+                      {isLimitReached ? 'LIMIT' : 'INSERT'}
                     </span>
                     <span className="text-[7px] sm:text-[10px] md:text-xs leading-tight font-micro">
-                      COIN
+                      {isLimitReached ? 'REACHED' : 'COIN'}
                     </span>
                   </button>
 
@@ -187,12 +197,42 @@ export const HomePage = ({
                     <span className="text-[7px] sm:text-[10px] md:text-xs leading-tight font-micro">
                       GALLERY
                     </span>
-                    <span className="text-[7px] sm:text-[10px] leading-tight font-micro">
+                    <span className="text-[7px] sm:text-[10px] leading-tight font-tiny5">
                       ({photoStripCount})
                     </span>
                   </button>
                 </div>
               </div>
+
+              {/* Photos Remaining Display - Only show when key is used and limit exists */}
+              {isKeyBased && photosRemaining !== undefined && (
+                <div className={`doodle-border text-center p-1.5 ${
+                  photosRemaining === 0
+                    ? 'bg-red-200 dark:bg-red-900/30 border-red-600 dark:border-red-400'
+                    : photosRemaining <= 2
+                    ? 'bg-yellow-200 dark:bg-yellow-900/30 border-yellow-600 dark:border-yellow-400'
+                    : 'bg-green-200 dark:bg-green-900/30 border-green-600 dark:border-green-400'
+                }`}>
+                  <p className={`text-[7px] sm:text-[10px] md:text-xs font-bold leading-tight mb-0.5 font-micro ${
+                    photosRemaining === 0
+                      ? 'text-red-800 dark:text-red-200'
+                      : photosRemaining <= 2
+                      ? 'text-yellow-800 dark:text-yellow-200'
+                      : 'text-green-800 dark:text-green-200'
+                  }`}>
+                    {photosRemaining === 0 ? 'No Photos Left' : 'Photos Remaining'}
+                  </p>
+                  {photosRemaining > 0 && (
+                    <p className={`text-sm sm:text-base md:text-lg font-black font-tiny5 ${
+                      photosRemaining <= 2
+                        ? 'text-yellow-900 dark:text-yellow-100'
+                        : 'text-green-900 dark:text-green-100'
+                    }`}>
+                      {photosRemaining}
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* Photo Count Selector */}
               <div className="bg-slate-300 doodle-border text-black p-1.5">
@@ -209,7 +249,7 @@ export const HomePage = ({
                           photoCount: count,
                         }))
                       }
-                      className={`py-1 sm:py-1.5 px-1 sm:px-1.5 doodle-button font-bold text-[10px] sm:text-xs md:text-sm transition-all ${
+                      className={`py-1 sm:py-1.5 px-1 sm:px-1.5 doodle-button font-bold font-tiny5 text-[10px] sm:text-xs md:text-sm transition-all ${
                         photoCount === count
                           ? "bg-yellow-400 text-black scale-105"
                           : "bg-white text-black hover:bg-gray-100"

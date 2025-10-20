@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { FaCamera, FaArrowLeft, FaDownload } from 'react-icons/fa6';
 import { Footer } from '../components/Footer';
-import { uploadPhotoToGoogleDrive, isGoogleDriveEnabled } from '../utils/googleDrive';
+import { uploadPhotoToGoogleDrive, isGoogleDriveEnabled } from '../utils/googleDriveUpload';
 import { FilterType, getCSSFilter, applyCanvasFilter } from '../utils/filters';
 import { createPhotoStripCanvas, downloadPhotoStrip } from '../utils/photostrip';
+import { incrementPhotoCount } from '../utils/configManager';
 
 type PhotoBoothProps = {
   navigateTo: (route: string) => void;
@@ -328,6 +329,9 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
       photoStrips: [...prev.photoStrips, strip]
     }));
 
+    // Increment the photo count for the current key
+    incrementPhotoCount();
+
     // Stop camera after photos are taken
     stopCamera();
 
@@ -337,8 +341,10 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
         // Create a composite photo strip image
         const compositeImage = await createPhotoStripCanvas(photos);
         const filename = `photo-strip-${strip.id}.jpg`;
-        await uploadPhotoToGoogleDrive(compositeImage, filename);
-        console.log('Photo strip automatically uploaded to Google Drive');
+        const result = await uploadPhotoToGoogleDrive(compositeImage, filename);
+        if (result.success) {
+          console.log('Photo strip automatically uploaded to Google Drive:', result);
+        }
       } catch (error) {
         console.error('Failed to auto-upload to Google Drive:', error);
       }
@@ -428,8 +434,8 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
             }}
             className="px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 doodle-button transition-colors text-xs sm:text-sm md:text-lg font-bold bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300 font-micro flex-shrink-0"
           >
-            <span className="hidden sm:inline">Gallery ({appState.photoStrips?.length || 0})</span>
-            <span className="sm:hidden">({appState.photoStrips?.length || 0})</span>
+            <span className="hidden sm:inline">Gallery <span className="font-tiny5">({appState.photoStrips?.length || 0})</span></span>
+            <span className="sm:hidden font-tiny5">({appState.photoStrips?.length || 0})</span>
           </button>
         </div>
 
@@ -495,7 +501,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                   /* Debug Mode Placeholder */
                   <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-500 to-green-500">
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-5">
-                      <div className="text-white text-6xl sm:text-7xl md:text-9xl font-bold animate-pulse">
+                      <div className="text-white text-6xl sm:text-7xl md:text-9xl font-bold font-tiny5 animate-pulse">
                         {countdown}
                       </div>
                     </div>
@@ -527,7 +533,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                     )}
 
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-5">
-                      <div className="text-white text-6xl sm:text-7xl md:text-9xl font-bold animate-pulse">
+                      <div className="text-white text-6xl sm:text-7xl md:text-9xl font-bold font-tiny5 animate-pulse">
                         {countdown}
                       </div>
                     </div>
@@ -553,7 +559,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                   <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-orange-500 to-red-500">
                     <div className="absolute top-4 sm:top-6 md:top-8 left-0 right-0 flex justify-center z-5">
                       <div className="bg-white text-black px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-3 doodle-button font-bold text-sm sm:text-base md:text-xl border-2 sm:border-3 md:border-4 border-black">
-                        PHOTO {currentPhotoIndex} OF {photoCount}
+                        PHOTO <span className="font-tiny5">{currentPhotoIndex}</span> OF <span className="font-tiny5">{photoCount}</span>
                       </div>
                     </div>
                   </div>
@@ -585,7 +591,7 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
 
                     <div className="absolute top-4 sm:top-6 md:top-8 left-0 right-0 flex justify-center z-5">
                       <div className="bg-white text-black px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-3 doodle-button font-bold text-sm sm:text-base md:text-xl border-2 sm:border-3 md:border-4 border-black">
-                        PHOTO {currentPhotoIndex} OF {photoCount}
+                        PHOTO <span className="font-tiny5">{currentPhotoIndex}</span> OF <span className="font-tiny5">{photoCount}</span>
                       </div>
                     </div>
                   </>

@@ -11,9 +11,9 @@ const SESSION_URL_NAME = 'picapal_session_url';
 
 export interface GoogleDriveConfig {
   enabled: boolean;
-  clientId: string;
-  folderId: string;
+  folderId: string; // Google Drive folder ID (optional)
   isKeyBased: boolean;
+  photoLimit?: number; // Maximum number of photo strips allowed (undefined = unlimited)
 }
 
 /**
@@ -71,25 +71,26 @@ export const isKeyBasedConfig = (): boolean => {
 
 /**
  * Parse configuration string from environment variable
- * Format: "enabled,clientId,folderId"
+ * Format: "enabled,folderId,photoLimit"
  */
 const parseConfigString = (configString: string): Omit<GoogleDriveConfig, 'isKeyBased'> | null => {
   if (!configString) return null;
 
   const parts = configString.split(',').map(part => part.trim());
 
-  if (parts.length !== 3) {
-    console.error('Invalid config format. Expected: enabled,clientId,folderId');
+  if (parts.length < 2 || parts.length > 3) {
+    console.error('Invalid config format. Expected: enabled,folderId[,photoLimit]');
     return null;
   }
 
-  const [enabledStr, clientId, folderId] = parts;
+  const [enabledStr, folderId, photoLimitStr] = parts;
   const enabled = enabledStr.toLowerCase() === 'true';
+  const photoLimit = photoLimitStr && photoLimitStr !== '' ? parseInt(photoLimitStr, 10) : undefined;
 
   return {
     enabled,
-    clientId: clientId || '',
     folderId: folderId || '',
+    photoLimit: photoLimit && !isNaN(photoLimit) ? photoLimit : undefined,
   };
 };
 
@@ -118,13 +119,11 @@ export const getGoogleDriveConfig = (): GoogleDriveConfig => {
 
   // Priority 2: Check localStorage (manual configuration from Settings UI)
   const localEnabled = localStorage.getItem('googleDriveEnabled') === 'true';
-  const localClientId = localStorage.getItem('googleDriveClientId') || '';
   const localFolderId = localStorage.getItem('googleDriveFolderId') || '';
 
-  if (localEnabled && localClientId) {
+  if (localEnabled) {
     return {
       enabled: localEnabled,
-      clientId: localClientId,
       folderId: localFolderId,
       isKeyBased: false,
     };
@@ -133,7 +132,6 @@ export const getGoogleDriveConfig = (): GoogleDriveConfig => {
   // No configuration found - return disabled state
   return {
     enabled: false,
-    clientId: '',
     folderId: '',
     isKeyBased: false,
   };
@@ -145,4 +143,65 @@ export const getGoogleDriveConfig = (): GoogleDriveConfig => {
  */
 export const clearConfigKey = (): void => {
   sessionStorage.removeItem(SESSION_KEY_NAME);
+};
+
+/**
+ * Get the storage key for tracking photo count for the current config key
+ */
+const getPhotoCountStorageKey = (): string => {
+  const configKey = getCurrentConfigKey();
+  if (configKey) {
+    return `picapal_photo_count_${configKey}`;
+  }
+  return 'picapal_photo_count_default';
+};
+
+/**
+ * Get the number of photos taken for the current key
+ */
+export const getPhotosTaken = (): number => {
+  const key = getPhotoCountStorageKey();
+  const count = localStorage.getItem(key);
+  return count ? parseInt(count, 10) : 0;
+};
+
+/**
+ * Increment the photo count for the current key
+ */
+export const incrementPhotoCount = (): void => {
+  const key = getPhotoCountStorageKey();
+  const current = getPhotosTaken();
+  localStorage.setItem(key, (current + 1).toString());
+};
+
+/**
+ * Check if the user has reached the photo limit
+ * Returns true if limit is reached, false otherwise
+ */
+export const hasReachedPhotoLimit = (): boolean => {
+  const config = getGoogleDriveConfig();
+
+  // If no photo limit is set, user can take unlimited photos
+  if (!config.photoLimit) {
+    return false;
+  }
+
+  const photosTaken = getPhotosTaken();
+  return photosTaken >= config.photoLimit;
+};
+
+/**
+ * Get the number of photos remaining
+ * Returns undefined if there's no limit
+ */
+export const getPhotosRemaining = (): number | undefined => {
+  const config = getGoogleDriveConfig();
+
+  if (!config.photoLimit) {
+    return undefined;
+  }
+
+  const photosTaken = getPhotosTaken();
+  const remaining = config.photoLimit - photosTaken;
+  return Math.max(0, remaining);
 };

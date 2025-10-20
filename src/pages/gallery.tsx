@@ -66,7 +66,7 @@ export const GalleryPage = ({ navigateTo, appState, setAppState }: GalleryPagePr
           </h1>
 
           <div className="text-xs sm:text-sm md:text-lg font-bold px-2 py-1.5 sm:px-3 sm:py-2 doodle-border bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300 flex-shrink-0">
-            {photoStrips.length} strip{photoStrips.length !== 1 ? 's' : ''}
+            <span className="font-tiny5">{photoStrips.length}</span> strip{photoStrips.length !== 1 ? 's' : ''}
           </div>
         </div>
 
@@ -104,8 +104,8 @@ export const GalleryPage = ({ navigateTo, appState, setAppState }: GalleryPagePr
 
                   {/* Strip Info */}
                   <div className="text-center mb-2 sm:mb-3">
-                    <p className="font-bold text-sm sm:text-base text-black dark:text-white">{strip.date}</p>
-                    <p className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">{strip.timestamp}</p>
+                    <p className="font-bold text-sm sm:text-base text-black dark:text-white font-tiny5">{strip.date}</p>
+                    <p className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 font-tiny5">{strip.timestamp}</p>
                   </div>
 
                   {/* Action Buttons */}
