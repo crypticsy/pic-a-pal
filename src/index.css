@@ -16,14 +16,15 @@
   }
 }
 
-body, html {
+body,
+html {
   overflow: hidden;
   margin: 0;
   padding: 0;
   /* Use CSS variable that can be updated by JS */
   height: var(--viewport-height);
   width: 100vw;
-  font-family: 'Pixelify Sans', cursive, sans-serif;
+  font-family: "Pixelify Sans", cursive, sans-serif;
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
@@ -35,11 +36,14 @@ body, html {
   left: 0;
   right: 0;
   bottom: 0;
+  /* Custom cursor - default arrow */
+  cursor: url("/cursor/astro_arrow.cur"), auto;
 }
 
 /* iOS Safari specific fix for address bar */
 @supports (-webkit-touch-callout: none) {
-  body, html {
+  body,
+  html {
     height: -webkit-fill-available;
   }
 }
@@ -61,20 +65,25 @@ body, html {
 
 /* Font utilities */
 .font-micro {
-  font-family: 'Pixelify Sans', monospace;
+  font-family: "Pixelify Sans", monospace;
 }
 
 .font-ready-start {
-  font-family: 'Press Start 2P', cursive, monospace;
+  font-family: "Press Start 2P", cursive, monospace;
 }
 
 .font-tiny5 {
-  font-family: 'Tiny5', monospace;
+  font-family: "Tiny5", monospace;
+}
+
+.font-chango {
+  font-family: "Bytesized", cursive;
 }
 
 /* Mobile-specific utilities */
 @supports (height: 100dvh) {
-  body, html {
+  body,
+  html {
     height: 100dvh;
   }
 }
@@ -142,7 +151,8 @@ body, html {
 
 /* Wiggle animations for subtle jitter effect */
 @keyframes wiggle {
-  0%, 100% {
+  0%,
+  100% {
     transform: rotate(0deg) translate(0px, 0px);
   }
   10% {
@@ -175,7 +185,8 @@ body, html {
 }
 
 @keyframes wiggle-slow {
-  0%, 100% {
+  0%,
+  100% {
     transform: rotate(0deg) scale(1);
   }
   12.5% {
@@ -202,7 +213,8 @@ body, html {
 }
 
 @keyframes wiggle-fast {
-  0%, 100% {
+  0%,
+  100% {
     transform: rotate(0deg) translate(0px, 0px);
   }
   10% {
@@ -239,32 +251,23 @@ body, html {
   border: 2px solid currentColor;
   position: relative;
   animation: wiggle 3s ease-in-out infinite;
-  box-shadow:
-    2px 0 0 0 currentColor,
-    -2px 0 0 0 currentColor,
-    0 2px 0 0 currentColor,
-    0 -2px 0 0 currentColor;
+  box-shadow: 2px 0 0 0 currentColor, -2px 0 0 0 currentColor,
+    0 2px 0 0 currentColor, 0 -2px 0 0 currentColor;
 }
 
 .doodle-border-thick {
   border: 3px solid currentColor;
   position: relative;
   animation: wiggle-slow 4s ease-in-out infinite;
-  box-shadow:
-    3px 0 0 0 currentColor,
-    -3px 0 0 0 currentColor,
-    0 3px 0 0 currentColor,
-    0 -3px 0 0 currentColor;
+  box-shadow: 3px 0 0 0 currentColor, -3px 0 0 0 currentColor,
+    0 3px 0 0 currentColor, 0 -3px 0 0 currentColor;
 }
 
 .doodle-box {
   border: 3px solid currentColor;
   animation: wiggle 2.8s ease-in-out infinite;
-  box-shadow:
-    3px 0 0 0 currentColor,
-    -3px 0 0 0 currentColor,
-    0 3px 0 0 currentColor,
-    0 -3px 0 0 currentColor;
+  box-shadow: 3px 0 0 0 currentColor, -3px 0 0 0 currentColor,
+    0 3px 0 0 currentColor, 0 -3px 0 0 currentColor;
 }
 
 .doodle-button {
@@ -295,7 +298,7 @@ body, html {
 }
 
 .wavy-underline::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   right: 0;
@@ -307,12 +310,13 @@ body, html {
 /* Sketchy shadow effect */
 .sketch-shadow {
   filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.3))
-          drop-shadow(-1px -1px 0px rgba(0, 0, 0, 0.1));
+    drop-shadow(-1px -1px 0px rgba(0, 0, 0, 0.1));
 }
 
 /* Cloud floating animations */
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0px) translateY(0px);
   }
   25% {
@@ -327,7 +331,8 @@ body, html {
 }
 
 @keyframes float-delayed {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0px) translateY(0px);
   }
   25% {
@@ -342,7 +347,8 @@ body, html {
 }
 
 @keyframes float-slow {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0px) translateY(0px);
   }
   33% {
@@ -355,7 +361,8 @@ body, html {
 
 /* Flying bird animation */
 @keyframes fly {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0px) translateY(0px);
   }
   25% {
@@ -398,3 +405,112 @@ body, html {
 .animate-spin-slow {
   animation: spin-slow 8s linear infinite;
 }
+
+/* Custom cursor styles */
+* {
+  cursor: url("/cursor/astro_arrow.cur") 8 8, auto;
+}
+
+a, button, [role="button"], .cursor-pointer, .cursor-pointer *, a:hover, button:hover, [role="button"]:hover, .cursor-pointer:hover, .cursor-pointer *:hover {
+  cursor: url("/cursor/astro_link.cur") 8 8, pointer;
+}
+
+[disabled],
+.disabled,
+.cursor-not-allowed {
+  cursor: url("/cursor/astro_unavail.cur") 8 8, not-allowed;
+}
+
+.cursor-wait,
+.loading {
+  cursor: url("/cursor/astro_working.ani") 8 8, wait;
+}
+
+/* TV Screen CRT Effect */
+.tv-screen {
+  position: relative;
+  background: #0a0a0a;
+  box-shadow:
+    inset 0 0 50px rgba(0, 255, 0, 0.1),
+    inset 0 0 100px rgba(0, 0, 0, 0.8);
+}
+
+.tv-screen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+.tv-screen::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* TV Screen Flicker Animation */
+@keyframes tv-flicker {
+  0%, 100% {
+    opacity: 0.97;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.tv-flicker {
+  animation: tv-flicker 0.15s infinite alternate;
+}
+
+/* Bouncing Character Animation - Sequential */
+@keyframes bounce-char {
+  0%, 25%, 100% {
+    transform: translateY(0px);
+  }
+  5% {
+    transform: translateY(-10px);
+  }
+  10% {
+    transform: translateY(0px);
+  }
+}
+
+.bounce-char {
+  display: inline-block;
+  animation: bounce-char 4.8s ease-in-out infinite;
+}
+
+/* Sequential stagger - each character bounces one after another */
+.bounce-char:nth-child(1) { animation-delay: 0s; }
+.bounce-char:nth-child(2) { animation-delay: 0.4s; }
+.bounce-char:nth-child(3) { animation-delay: 0.8s; }
+.bounce-char:nth-child(4) { animation-delay: 1.2s; }
+.bounce-char:nth-child(5) { animation-delay: 1.6s; }
+.bounce-char:nth-child(6) { animation-delay: 2s; }
+.bounce-char:nth-child(7) { animation-delay: 2.4s; }
+.bounce-char:nth-child(8) { animation-delay: 2.8s; }
+.bounce-char:nth-child(9) { animation-delay: 3.2s; }
+.bounce-char:nth-child(10) { animation-delay: 3.6s; }
+.bounce-char:nth-child(11) { animation-delay: 4s; }
+.bounce-char:nth-child(12) { animation-delay: 4.4s; }

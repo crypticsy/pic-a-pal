@@ -114,53 +114,56 @@ export const HomePage = ({
           <div className="mb-0 z-30 relative w-full max-w-sm px-2 sm:px-3 flex flex-col justify-end">
             {/* Top Sign */}
             <div className="doodle-border-thick p-2 sm:p-2 md:p-3 shadow-2xl sketch-shadow bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
-              <h1 className="text-xs sm:text-sm md:text-xl lg:text-2xl font-black text-center leading-tight text-black dark:text-white">
+              <h1 className="text-lg sm:text-xl md:text-3xl lg:text-4xl font-black text-center leading-tight text-black dark:text-white font-chango">
                 Pocket Booth
               </h1>
-              <p className="text-center text-[8px] sm:text-[10px] md:text-base font-bold mt-1 sm:mt-1 text-gray-600 dark:text-gray-400 font-micro">
+              <p className="text-center text-xs sm:text-sm md:text-base font-bold mt-1 sm:mt-1 text-gray-600 dark:text-gray-400 font-micro">
                 Photo Strip
               </p>
             </div>
 
             {/* Main Booth Body */}
             <div className="doodle-border-thick p-2 sm:p-2 md:p-3 shadow-2xl gap-2 sm:gap-2 md:gap-3 flex flex-col bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
-              {/* Screen Area - Filter Selection with Preview */}
+              {/* TV Screen Area - Filter Selection */}
               <div className="bg-gray-900 doodle-box text-white p-1.5 shadow-inner">
-                <div className="aspect-[16/12] bg-black doodle-border flex items-center justify-center relative overflow-hidden p-2">
-                  {/* Filter Preview and Navigation */}
-                  <div className="w-full flex justify-between px-2 z-10">
-                    {/* Left Arrow */}
+                <div className="aspect-[16/12] bg-black doodle-border flex flex-col relative tv-screen">
+                  {/* Top: Filter Demo Box - Takes available space above buttons */}
+                  <div className="flex-1 flex items-center justify-center tv-flicker z-20 min-h-0">
+                    <img
+                      src="https://img.freepik.com/premium-vector/pixel-art-characters-set-8bit-avatar-funny-faces-80s-nft-cartoon-vector-icon_250257-5371.jpg"
+                      alt="Character waving"
+                      className="w-full h-full object-cover object-top"
+                      style={{ filter: getCSSFilter(selectedFilter) }}
+                    />
+                  </div>
+
+                  {/* Bottom: Arrow buttons and Filter Name */}
+                  <div className="flex items-stretch h-12 sm:h-14 md:h-16 z-30 flex-shrink-0 relative">
+                    {/* Left Arrow - Full Height */}
                     <button
                       onClick={prevFilter}
-                      className="bg-yellow-400 dark:bg-yellow-600 hover:bg-yellow-500 dark:hover:bg-yellow-700 text-black p-2 sm:p-2 doodle-button flex-shrink-0 cursor-pointer min-h-24"
+                      className="bg-yellow-400 dark:bg-yellow-600 hover:bg-yellow-500 dark:hover:bg-yellow-700 text-black px-2 sm:px-3 md:px-4 doodle-button flex-shrink-0 cursor-pointer flex items-center justify-center"
                     >
-                      <FaChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <FaChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
                     </button>
 
-                    {/* Center: Filter Demo and Name */}
-                    <div className="flex flex-col items-center justify-center gap-3 flex-grow mx-2">
-                      {/* Filter Demo Box */}
-                      <div
-                        className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 doodle-border border-white"
-                        style={{ filter: getCSSFilter(selectedFilter) }}
-                      >
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-yellow-400 rounded-full"></div>
-                        </div>
+                    {/* Center: Filter Name - Bouncing Characters */}
+                    <div className="flex-grow flex items-center justify-center bg-black">
+                      <div className="text-green-400 font-bold text-xs sm:text-sm md:text-base text-center font-mono tracking-wider">
+                        {getFilterName(selectedFilter).split('').map((char, index) => (
+                          <span key={index} className="bounce-char">
+                            {char === ' ' ? '\u00A0' : char}
+                          </span>
+                        ))}
                       </div>
-
-                      {/* Filter Name */}
-                      <span className="text-yellow-400 dark:text-yellow-300 px-3 sm:px-4 py-1 sm:py-1.5 font-bold text-[8px] sm:text-[10px] md:text-xs text-center">
-                        {getFilterName(selectedFilter)}
-                      </span>
                     </div>
 
-                    {/* Right Arrow */}
+                    {/* Right Arrow - Full Height */}
                     <button
                       onClick={nextFilter}
-                      className="bg-yellow-400 dark:bg-yellow-600 hover:bg-yellow-500 dark:hover:bg-yellow-700 text-black p-2 sm:p-2 doodle-button flex-shrink-0 cursor-pointer min-h-24"
+                      className="bg-yellow-400 dark:bg-yellow-600 hover:bg-yellow-500 dark:hover:bg-yellow-700 text-black px-2 sm:px-3 md:px-4 doodle-button flex-shrink-0 cursor-pointer flex items-center justify-center"
                     >
-                      <FaChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <FaChevronRight className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
                     </button>
                   </div>
                 </div>
@@ -179,11 +182,11 @@ export const HomePage = ({
                         : 'bg-yellow-400 dark:bg-yellow-500 hover:bg-yellow-500 dark:hover:bg-yellow-600 text-black cursor-pointer'
                     }`}
                   >
-                    <LuCoins className={`w-3 h-3 sm:w-5 sm:h-5 md:w-6 md:h-6 ${!isLimitReached && 'animate-pulse'}`} />
-                    <span className="text-[7px] sm:text-[10px] md:text-xs leading-tight font-micro">
+                    <LuCoins className={`w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 ${!isLimitReached && 'animate-pulse'}`} />
+                    <span className="text-[10px] sm:text-xs md:text-sm leading-tight font-micro">
                       {isLimitReached ? 'LIMIT' : 'INSERT'}
                     </span>
-                    <span className="text-[7px] sm:text-[10px] md:text-xs leading-tight font-micro">
+                    <span className="text-[10px] sm:text-xs md:text-sm leading-tight font-micro">
                       {isLimitReached ? 'REACHED' : 'COIN'}
                     </span>
                   </button>
@@ -193,11 +196,11 @@ export const HomePage = ({
                     onClick={() => navigateTo("gallery")}
                     className="bg-white hover:bg-gray-100 text-black font-black py-2 sm:py-3 md:py-4 px-1 sm:px-1.5 doodle-button shadow-xl flex flex-col items-center justify-center gap-0.5 cursor-pointer"
                   >
-                    <FaImage className="w-3 h-3 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-                    <span className="text-[7px] sm:text-[10px] md:text-xs leading-tight font-micro">
+                    <FaImage className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
+                    <span className="text-[10px] sm:text-xs md:text-sm leading-tight font-micro">
                       GALLERY
                     </span>
-                    <span className="text-[7px] sm:text-[10px] leading-tight font-tiny5">
+                    <span className="text-[10px] sm:text-xs md:text-sm leading-tight font-tiny5">
                       ({photoStripCount})
                     </span>
                   </button>
@@ -213,7 +216,7 @@ export const HomePage = ({
                     ? 'bg-yellow-200 dark:bg-yellow-900/30 border-yellow-600 dark:border-yellow-400'
                     : 'bg-green-200 dark:bg-green-900/30 border-green-600 dark:border-green-400'
                 }`}>
-                  <p className={`text-[7px] sm:text-[10px] md:text-xs font-bold leading-tight mb-0.5 font-micro ${
+                  <p className={`text-[10px] sm:text-xs md:text-sm font-bold leading-tight mb-0.5 font-micro ${
                     photosRemaining === 0
                       ? 'text-red-800 dark:text-red-200'
                       : photosRemaining <= 2
@@ -223,7 +226,7 @@ export const HomePage = ({
                     {photosRemaining === 0 ? 'No Photos Left' : 'Photos Remaining'}
                   </p>
                   {photosRemaining > 0 && (
-                    <p className={`text-sm sm:text-base md:text-lg font-black font-tiny5 ${
+                    <p className={`text-base sm:text-lg md:text-xl font-black font-tiny5 ${
                       photosRemaining <= 2
                         ? 'text-yellow-900 dark:text-yellow-100'
                         : 'text-green-900 dark:text-green-100'
@@ -236,7 +239,7 @@ export const HomePage = ({
 
               {/* Photo Count Selector */}
               <div className="bg-slate-300 doodle-border text-black p-1.5">
-                <p className="text-black text-center text-[7px] sm:text-[10px] md:text-xs font-bold leading-tight mb-1 sm:mb-1.5 font-micro">
+                <p className="text-black text-center text-[10px] sm:text-xs md:text-sm font-bold leading-tight mb-1 sm:mb-1.5 font-micro">
                   Strip Length
                 </p>
                 <div className="grid grid-cols-4 gap-0.5 sm:gap-1">
@@ -249,7 +252,7 @@ export const HomePage = ({
                           photoCount: count,
                         }))
                       }
-                      className={`py-1 sm:py-1.5 px-1 sm:px-1.5 doodle-button font-bold font-tiny5 text-[10px] sm:text-xs md:text-sm transition-all ${
+                      className={`py-1 sm:py-1.5 px-1 sm:px-1.5 doodle-button font-bold font-tiny5 text-sm sm:text-base md:text-lg transition-all ${
                         photoCount === count
                           ? "bg-yellow-400 text-black scale-105"
                           : "bg-white text-black hover:bg-gray-100"
@@ -264,15 +267,15 @@ export const HomePage = ({
               {/* Camera Selection (Mobile Only) */}
               {isMobile && (
                 <div className="bg-blue-100 doodle-border text-black p-1.5">
-                  <p className="text-black text-center text-[7px] sm:text-[10px] md:text-xs font-bold leading-tight mb-1 sm:mb-1.5 font-micro">
+                  <p className="text-black text-center text-[10px] sm:text-xs md:text-sm font-bold leading-tight mb-1 sm:mb-1.5 font-micro">
                     Camera
                   </p>
                   <button
                     onClick={toggleCamera}
                     className="w-full bg-white hover:bg-gray-100 text-black font-black py-1.5 sm:py-2 px-1.5 doodle-button shadow-xl flex items-center justify-center gap-1.5"
                   >
-                    <FaCameraRotate className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span className="text-[7px] sm:text-[10px] md:text-xs leading-tight font-micro">
+                    <FaCameraRotate className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <span className="text-[10px] sm:text-xs md:text-sm leading-tight font-micro">
                       {cameraFacing === "user" ? "FRONT" : "BACK"}
                     </span>
                   </button>
