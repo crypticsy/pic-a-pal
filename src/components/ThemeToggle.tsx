@@ -23,9 +23,9 @@ export const ThemeToggle = ({ appState, setAppState }: ThemeToggleProps) => {
       title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
     >
       {isDark ? (
-        <IoMoon className="w-5 h-5 md:w-10 md:h-10 animate-pulse" />
+        <IoMoon className="w-7 h-7 md:w-10 md:h-10 animate-pulse" />
       ) : (
-        <IoSunny className="w-5 h-5 md:w-10 md:h-10 animate-spin-slow" />
+        <IoSunny className="w-7 h-7 md:w-10 md:h-10 animate-spin-slow" />
       )}
     </button>
   );

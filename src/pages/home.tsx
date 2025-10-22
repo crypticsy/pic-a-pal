@@ -1,4 +1,4 @@
-import { FaImage, FaCameraRotate, FaChevronLeft, FaChevronRight } from "react-icons/fa6";
+import { FaImage, FaCameraRotate, FaChevronLeft, FaChevronRight, FaCircleInfo } from "react-icons/fa6";
 import { LuCoins } from "react-icons/lu";
 import { Footer } from "../components/Footer";
 import { ThemeToggle } from "../components/ThemeToggle";
@@ -6,6 +6,7 @@ import { Houses } from "../components/Houses";
 import { Clouds } from "../components/Clouds";
 import { Stars } from "../components/Stars";
 import { InstagramModal } from "../components/InstagramModal";
+import { InfoGuideModal } from "../components/InfoGuideModal";
 import { PixelButton, PixelButtonVertical, PixelIconButton } from "../components/PixelButton";
 import { useState, useEffect } from "react";
 import { FilterType, getFilterName, getCSSFilter } from "../utils/filters";
@@ -28,6 +29,7 @@ export const HomePage = ({
   const photoCount = appState?.photoCount || 4;
   const [isMobile, setIsMobile] = useState(false);
   const [showInstagramModal, setShowInstagramModal] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
   const cameraFacing = appState?.cameraFacing || "user";
   const selectedFilter = (appState?.selectedFilter as FilterType) || "normal";
 
@@ -55,6 +57,33 @@ export const HomePage = ({
       setShowInstagramModal(true);
     }
   }, []);
+
+  // Auto-show info modal on first visit (after Instagram modal if present)
+  useEffect(() => {
+    const hasSeenInfoGuide = localStorage.getItem('hasSeenInfoGuide');
+
+    if (!hasSeenInfoGuide) {
+      // If Instagram modal is showing, delay the info modal
+      if (isInstagramBrowser()) {
+        // Wait a bit for user to close Instagram modal first
+        const timer = setTimeout(() => {
+          if (!showInstagramModal) {
+            setShowInfoModal(true);
+          }
+        }, 500);
+        return () => clearTimeout(timer);
+      } else {
+        // Show immediately if not Instagram browser
+        setShowInfoModal(true);
+      }
+    }
+  }, [showInstagramModal]);
+
+  // Mark info guide as seen when modal closes
+  const handleInfoModalClose = () => {
+    setShowInfoModal(false);
+    localStorage.setItem('hasSeenInfoGuide', 'true');
+  };
 
   const toggleCamera = () => {
     setAppState?.((prev: any) => ({
@@ -89,6 +118,19 @@ export const HomePage = ({
 
       {/* Theme Toggle */}
       {setAppState && <ThemeToggle appState={appState} setAppState={setAppState} />}
+
+      {/* Info Button - Top Left */}
+      <button
+        onClick={() => setShowInfoModal(true)}
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-50 p-2 doodle-button transition-all bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-110 shadow-lg"
+        aria-label="Photo booth guide"
+        style={{
+          top: 'max(1rem, env(safe-area-inset-top, 1rem))',
+          left: 'max(1rem, env(safe-area-inset-left, 1rem))'
+        }}
+      >
+        <FaCircleInfo className="w-5 h-5" />
+      </button>
 
       {/* Settings Button */}
       {/* {setAppState && <Settings appState={appState} setAppState={setAppState} />} */}
@@ -304,6 +346,9 @@ export const HomePage = ({
       {showInstagramModal && (
         <InstagramModal onClose={() => setShowInstagramModal(false)} />
       )}
+
+      {/* Info Guide Modal */}
+      {showInfoModal && <InfoGuideModal onClose={handleInfoModalClose} />}
     </div>
   );
 };
