@@ -271,7 +271,7 @@ html {
 }
 
 .doodle-button {
-  border: 2px solid currentColor;
+  border: 3px solid currentColor;
   transition: all 0.2s ease;
   position: relative;
   animation: wiggle 2.5s ease-in-out infinite;

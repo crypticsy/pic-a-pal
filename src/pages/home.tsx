@@ -6,6 +6,7 @@ import { Houses } from "../components/Houses";
 import { Clouds } from "../components/Clouds";
 import { Stars } from "../components/Stars";
 import { InstagramModal } from "../components/InstagramModal";
+import { PixelButton, PixelButtonVertical, PixelIconButton } from "../components/PixelButton";
 import { useState, useEffect } from "react";
 import { FilterType, getFilterName, getCSSFilter } from "../utils/filters";
 import { isInstagramBrowser } from "../utils/photostrip";
@@ -140,16 +141,18 @@ export const HomePage = ({
                   {/* Bottom: Arrow buttons and Filter Name */}
                   <div className="flex items-stretch h-12 sm:h-14 md:h-16 z-30 flex-shrink-0 relative">
                     {/* Left Arrow - Full Height */}
-                    <button
+                    <PixelIconButton
                       onClick={prevFilter}
-                      className="bg-yellow-400 dark:bg-yellow-600 hover:bg-yellow-500 dark:hover:bg-yellow-700 text-black px-2 sm:px-3 md:px-4 doodle-button flex-shrink-0 cursor-pointer flex items-center justify-center"
+                      variant="primary"
+                      size="lg"
+                      className="flex-shrink-0 h-full rounded-none"
                     >
                       <FaChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
-                    </button>
+                    </PixelIconButton>
 
                     {/* Center: Filter Name - Bouncing Characters */}
-                    <div className="flex-grow flex items-center justify-center bg-black">
-                      <div className="text-green-400 font-bold text-xs sm:text-sm md:text-base text-center font-mono tracking-wider">
+                    <div className="flex-grow flex items-center justify-center bg-slate-800">
+                      <div className="text-yellow-400 font-bold text-xs sm:text-sm md:text-base text-center font-mono tracking-wider">
                         {getFilterName(selectedFilter).split('').map((char, index) => (
                           <span key={index} className="bounce-char">
                             {char === ' ' ? '\u00A0' : char}
@@ -159,12 +162,14 @@ export const HomePage = ({
                     </div>
 
                     {/* Right Arrow - Full Height */}
-                    <button
+                    <PixelIconButton
                       onClick={nextFilter}
-                      className="bg-yellow-400 dark:bg-yellow-600 hover:bg-yellow-500 dark:hover:bg-yellow-700 text-black px-2 sm:px-3 md:px-4 doodle-button flex-shrink-0 cursor-pointer flex items-center justify-center"
+                      variant="primary"
+                      size="lg"
+                      className="flex-shrink-0 h-full rounded-none"
                     >
                       <FaChevronRight className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
-                    </button>
+                    </PixelIconButton>
                   </div>
                 </div>
               </div>
@@ -173,37 +178,36 @@ export const HomePage = ({
               <div className="doodle-box p-1.5 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
                 <div className="grid grid-cols-2 gap-1 sm:gap-1.5">
                   {/* Insert Coin Button - Left */}
-                  <button
+                  <PixelButtonVertical
                     onClick={() => !isLimitReached && navigateTo("photobooth")}
                     disabled={isLimitReached}
-                    className={`font-black py-2 sm:py-3 md:py-4 px-1 sm:px-1.5 doodle-button shadow-xl flex flex-col items-center justify-center gap-0.5 ${
-                      isLimitReached
-                        ? 'bg-gray-400 dark:bg-gray-600 text-gray-700 dark:text-gray-400 cursor-not-allowed opacity-60'
-                        : 'bg-yellow-400 dark:bg-yellow-500 hover:bg-yellow-500 dark:hover:bg-yellow-600 text-black cursor-pointer'
-                    }`}
+                    variant={isLimitReached ? "disabled" : "primary"}
+                    icon={<LuCoins className={`w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mb-1 ${!isLimitReached && 'animate-pulse'}`} />}
                   >
-                    <LuCoins className={`w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 ${!isLimitReached && 'animate-pulse'}`} />
-                    <span className="text-[10px] sm:text-xs md:text-sm leading-tight font-micro">
-                      {isLimitReached ? 'LIMIT' : 'INSERT'}
-                    </span>
-                    <span className="text-[10px] sm:text-xs md:text-sm leading-tight font-micro">
-                      {isLimitReached ? 'REACHED' : 'COIN'}
-                    </span>
-                  </button>
+                    {isLimitReached ? (
+                      <>
+                        <span>LIMIT</span> &nbsp;
+                        <span>REACHED</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>INSERT</span> &nbsp;
+                        <span>COIN</span>
+                      </>
+                    )}
+                  </PixelButtonVertical>
 
                   {/* Gallery Button - Right */}
-                  <button
+                  <PixelButtonVertical
                     onClick={() => navigateTo("gallery")}
-                    className="bg-white hover:bg-gray-100 text-black font-black py-2 sm:py-3 md:py-4 px-1 sm:px-1.5 doodle-button shadow-xl flex flex-col items-center justify-center gap-0.5 cursor-pointer"
+                    variant="secondary"
+                    icon={<FaImage className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7  mb-1" />}
                   >
-                    <FaImage className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
-                    <span className="text-[10px] sm:text-xs md:text-sm leading-tight font-micro">
-                      GALLERY
-                    </span>
-                    <span className="text-[10px] sm:text-xs md:text-sm leading-tight font-tiny5">
-                      ({photoStripCount})
-                    </span>
-                  </button>
+                    <>
+                      <span>GALLERY</span> &nbsp;
+                      <span className="font-tiny5">({photoStripCount})</span>
+                    </>
+                  </PixelButtonVertical>
                 </div>
               </div>
 
@@ -238,13 +242,13 @@ export const HomePage = ({
               )}
 
               {/* Photo Count Selector */}
-              <div className="bg-slate-300 doodle-border text-black p-1.5">
-                <p className="text-black text-center text-[10px] sm:text-xs md:text-sm font-bold leading-tight mb-1 sm:mb-1.5 font-micro">
+              <div className="bg-slate-800 doodle-border text-black p-1.5">
+                <p className="text-white text-center text-[10px] sm:text-xs md:text-sm font-bold leading-tight mb-1 sm:mb-1.5 font-micro">
                   Strip Length
                 </p>
                 <div className="grid grid-cols-4 gap-0.5 sm:gap-1">
                   {[1, 2, 3, 4].map((count) => (
-                    <button
+                    <PixelButton
                       key={count}
                       onClick={() =>
                         setAppState?.((prev: any) => ({
@@ -252,14 +256,14 @@ export const HomePage = ({
                           photoCount: count,
                         }))
                       }
-                      className={`py-1 sm:py-1.5 px-1 sm:px-1.5 doodle-button font-bold font-tiny5 text-sm sm:text-base md:text-lg transition-all ${
-                        photoCount === count
-                          ? "bg-yellow-400 text-black scale-105"
-                          : "bg-white text-black hover:bg-gray-100"
+                      variant={photoCount === count ? "primary" : "secondary"}
+                      size="sm"
+                      className={`font-tiny5 text-sm sm:text-base md:text-lg transition-all ${
+                        photoCount === count ? "scale-105" : ""
                       }`}
                     >
                       {count}
-                    </button>
+                    </PixelButton>
                   ))}
                 </div>
               </div>
@@ -270,15 +274,15 @@ export const HomePage = ({
                   <p className="text-black text-center text-[10px] sm:text-xs md:text-sm font-bold leading-tight mb-1 sm:mb-1.5 font-micro">
                     Camera
                   </p>
-                  <button
+                  <PixelButton
                     onClick={toggleCamera}
-                    className="w-full bg-white hover:bg-gray-100 text-black font-black py-1.5 sm:py-2 px-1.5 doodle-button shadow-xl flex items-center justify-center gap-1.5"
+                    variant="secondary"
+                    size="md"
+                    fullWidth
+                    icon={<FaCameraRotate className="w-5 h-5 sm:w-6 sm:h-6" />}
                   >
-                    <FaCameraRotate className="w-5 h-5 sm:w-6 sm:h-6" />
-                    <span className="text-[10px] sm:text-xs md:text-sm leading-tight font-micro">
-                      {cameraFacing === "user" ? "FRONT" : "BACK"}
-                    </span>
-                  </button>
+                    {cameraFacing === "user" ? "FRONT" : "BACK"}
+                  </PixelButton>
                 </div>
               )}
             </div>
