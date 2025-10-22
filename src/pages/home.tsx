@@ -122,22 +122,22 @@ export const HomePage = ({
       {/* Info Button - Top Left */}
       <button
         onClick={() => setShowInfoModal(true)}
-        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-50 p-2 doodle-button transition-all bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-110 shadow-lg"
+        className="absolute top-3 left-3 sm:top-6 sm:left-6 z-50 p-1.5 sm:p-2 doodle-button transition-all bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-110 shadow-lg"
         aria-label="Photo booth guide"
         style={{
-          top: 'max(1rem, env(safe-area-inset-top, 1rem))',
-          left: 'max(1rem, env(safe-area-inset-left, 1rem))'
+          top: 'max(0.75rem, env(safe-area-inset-top, 0.75rem))',
+          left: 'max(0.75rem, env(safe-area-inset-left, 0.75rem))'
         }}
       >
-        <FaCircleInfo className="w-5 h-5" />
+        <FaCircleInfo className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
 
       {/* Settings Button */}
       {/* {setAppState && <Settings appState={appState} setAppState={setAppState} />} */}
 
       {/* Main Scene Container */}
-      <div className="absolute inset-0 flex flex-col" style={{
-        paddingTop: 'env(safe-area-inset-top)',
+      <div className="absolute inset-0 flex flex-col pt-12 sm:pt-16" style={{
+        paddingTop: 'max(3rem, env(safe-area-inset-top, 3rem))',
         paddingBottom: 'env(safe-area-inset-bottom)'
       }}>
         {/* Stars (only in dark mode) */}
@@ -154,21 +154,21 @@ export const HomePage = ({
           </div>
 
           {/* Photo Booth Structure */}
-          <div className="mb-0 z-30 relative w-full max-w-sm px-2 sm:px-3 flex flex-col justify-end">
+          <div className="mb-0 z-30 relative w-full max-w-[280px] sm:max-w-xs md:max-w-sm px-2 sm:px-3 flex flex-col justify-end">
             {/* Top Sign */}
-            <div className="doodle-border-thick p-2 sm:p-2 md:p-3 shadow-2xl sketch-shadow bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
-              <h1 className="text-lg sm:text-xl md:text-3xl lg:text-4xl font-black text-center leading-tight text-black dark:text-white font-chango">
+            <div className="doodle-border-thick p-1.5 sm:p-2 md:p-3 shadow-2xl sketch-shadow bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
+              <h1 className="text-base sm:text-lg md:text-3xl lg:text-4xl font-black text-center leading-tight text-black dark:text-white font-chango">
                 Pocket Booth
               </h1>
-              <p className="text-center text-xs sm:text-sm md:text-base font-bold mt-1 sm:mt-1 text-gray-600 dark:text-gray-400 font-micro">
+              <p className="text-center text-[10px] sm:text-xs md:text-base font-bold mt-0.5 sm:mt-1 text-gray-600 dark:text-gray-400 font-micro">
                 Photo Strip
               </p>
             </div>
 
             {/* Main Booth Body */}
-            <div className="doodle-border-thick p-2 sm:p-2 md:p-3 shadow-2xl gap-2 sm:gap-2 md:gap-3 flex flex-col bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
+            <div className="doodle-border-thick p-1.5 sm:p-2 md:p-3 shadow-2xl gap-1.5 sm:gap-2 md:gap-3 flex flex-col bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
               {/* TV Screen Area - Filter Selection */}
-              <div className="bg-gray-900 doodle-box text-white p-1.5 shadow-inner">
+              <div className="bg-gray-900 doodle-box text-white p-1 sm:p-1.5 shadow-inner">
                 <div className="aspect-[16/12] bg-black doodle-border flex flex-col relative tv-screen">
                   {/* Top: Filter Demo Box - Takes available space above buttons */}
                   <div className="flex-1 flex items-center justify-center tv-flicker z-20 min-h-0">
@@ -181,7 +181,7 @@ export const HomePage = ({
                   </div>
 
                   {/* Bottom: Arrow buttons and Filter Name */}
-                  <div className="flex items-stretch h-12 sm:h-14 md:h-16 z-30 flex-shrink-0 relative">
+                  <div className="flex items-stretch h-10 sm:h-12 md:h-16 z-30 flex-shrink-0 relative">
                     {/* Left Arrow - Full Height */}
                     <PixelIconButton
                       onClick={prevFilter}
@@ -189,12 +189,12 @@ export const HomePage = ({
                       size="lg"
                       className="flex-shrink-0 h-full rounded-none"
                     >
-                      <FaChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
+                      <FaChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" />
                     </PixelIconButton>
 
                     {/* Center: Filter Name - Bouncing Characters */}
                     <div className="flex-grow flex items-center justify-center bg-slate-800">
-                      <div className="text-yellow-400 font-bold text-xs sm:text-sm md:text-base text-center font-mono tracking-wider">
+                      <div className="text-yellow-400 font-bold text-[10px] sm:text-xs md:text-base text-center font-mono tracking-wider">
                         {getFilterName(selectedFilter).split('').map((char, index) => (
                           <span key={index} className="bounce-char">
                             {char === ' ' ? '\u00A0' : char}
@@ -210,21 +210,21 @@ export const HomePage = ({
                       size="lg"
                       className="flex-shrink-0 h-full rounded-none"
                     >
-                      <FaChevronRight className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
+                      <FaChevronRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" />
                     </PixelIconButton>
                   </div>
                 </div>
               </div>
 
               {/* Controls Panel */}
-              <div className="doodle-box p-1.5 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
+              <div className="doodle-box p-1 sm:p-1.5 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300">
                 <div className="grid grid-cols-2 gap-1 sm:gap-1.5">
                   {/* Insert Coin Button - Left */}
                   <PixelButtonVertical
                     onClick={() => !isLimitReached && navigateTo("photobooth")}
                     disabled={isLimitReached}
                     variant={isLimitReached ? "disabled" : "primary"}
-                    icon={<LuCoins className={`w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 mb-1 ${!isLimitReached && 'animate-pulse'}`} />}
+                    icon={<LuCoins className={`w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7 mb-0.5 sm:mb-1 ${!isLimitReached && 'animate-pulse'}`} />}
                   >
                     {isLimitReached ? (
                       <>
@@ -243,7 +243,7 @@ export const HomePage = ({
                   <PixelButtonVertical
                     onClick={() => navigateTo("gallery")}
                     variant="secondary"
-                    icon={<FaImage className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7  mb-1" />}
+                    icon={<FaImage className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7 mb-0.5 sm:mb-1" />}
                   >
                     <>
                       <span>GALLERY</span> &nbsp;
@@ -284,8 +284,8 @@ export const HomePage = ({
               )}
 
               {/* Photo Count Selector */}
-              <div className="bg-slate-800 doodle-border text-black p-1.5">
-                <p className="text-white text-center text-[10px] sm:text-xs md:text-sm font-bold leading-tight mb-1 sm:mb-1.5 font-micro">
+              <div className="bg-slate-800 doodle-border text-black p-1 sm:p-1.5">
+                <p className="text-white text-center text-[10px] sm:text-xs md:text-sm font-bold leading-tight mb-0.5 sm:mb-1 font-micro">
                   Strip Length
                 </p>
                 <div className="grid grid-cols-4 gap-0.5 sm:gap-1">
@@ -300,7 +300,7 @@ export const HomePage = ({
                       }
                       variant={photoCount === count ? "primary" : "secondary"}
                       size="sm"
-                      className={`font-tiny5 text-sm sm:text-base md:text-lg transition-all ${
+                      className={`font-tiny5 text-xs sm:text-sm md:text-lg transition-all ${
                         photoCount === count ? "scale-105" : ""
                       }`}
                     >
@@ -312,8 +312,8 @@ export const HomePage = ({
 
               {/* Camera Selection (Mobile Only) */}
               {isMobile && (
-                <div className="bg-blue-100 doodle-border text-black p-1.5">
-                  <p className="text-black text-center text-[10px] sm:text-xs md:text-sm font-bold leading-tight mb-1 sm:mb-1.5 font-micro">
+                <div className="bg-blue-100 doodle-border text-black p-1 sm:p-1.5">
+                  <p className="text-black text-center text-[10px] sm:text-xs md:text-sm font-bold leading-tight mb-0.5 sm:mb-1 font-micro">
                     Camera
                   </p>
                   <PixelButton
@@ -321,7 +321,7 @@ export const HomePage = ({
                     variant="secondary"
                     size="md"
                     fullWidth
-                    icon={<FaCameraRotate className="w-5 h-5 sm:w-6 sm:h-6" />}
+                    icon={<FaCameraRotate className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />}
                   >
                     {cameraFacing === "user" ? "FRONT" : "BACK"}
                   </PixelButton>
@@ -337,7 +337,7 @@ export const HomePage = ({
         </div>
 
         {/* Ground Area - base only */}
-        <div className="h-8 sm:h-10 md:h-12 lg:h-14 bg-gray-500 dark:bg-slate-950 border-y-0 relative flex-shrink-0"></div>
+        <div className="h-10 sm:h-13 md:h-12 lg:h-14 bg-gray-500/70 dark:bg-slate-950 border-y-0 relative flex-shrink-0"></div>
       </div>
 
       <Footer />
