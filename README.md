@@ -12,27 +12,51 @@ Your pocket-sized photo booth application that captures instant photo strips wit
 - 🎯 **Instagram Detection** - Warns users to open in regular browser
 - 💾 **Offline Gallery** - View all photos in local storage
 - ⬇️ **Download Photos** - Save photo strips as JPEG files
+- ☁️ **Google Drive Upload** - Optional cloud storage with OAuth (requires Vercel backend)
 
 ---
 
 ## 🚀 Quick Start
 
-### GitHub Pages Deployment (Recommended)
-**Free hosting with local browser storage**
+### Option 1: Basic Deployment (GitHub Pages Only)
+**Free hosting with local browser storage only**
 
 ```bash
 # Install dependencies
-npm install
+yarn install
 
 # Build and deploy to GitHub Pages
-npm run deploy
+yarn deploy
 ```
+
+This deploys only the frontend. Photos are stored in browser's localStorage.
+
+### Option 2: Full Deployment (GitHub Pages + Vercel)
+**With Google Drive cloud upload support**
+
+1. **Deploy Frontend to GitHub Pages:**
+   ```bash
+   yarn deploy
+   ```
+
+2. **Deploy Backend to Vercel:**
+   - Create project in Vercel dashboard
+   - Download OAuth JSON from Google Cloud Console
+   - Set `GOOGLE_OAUTH_CREDENTIALS` environment variable
+   - **Note**: Vercel deployment is manual via their web dashboard
+
+3. **Connect Frontend to Backend:**
+   - Create `.env.production` locally (gitignored, won't be committed)
+   - Add: `VITE_VERCEL_API_URL=https://your-vercel-url.vercel.app`
+   - Redeploy frontend: `yarn deploy`
+
+📖 **Full guide**: [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ### Local Development
 
 ```bash
-npm install
-npm run dev
+yarn install
+yarn dev
 ```
 
 Visit `http://localhost:5173`
@@ -110,6 +134,7 @@ Access with: `https://yoursite.com/pocket-booth/?key=wedding`
 
 ## 🏗️ Architecture
 
+### Basic Setup (GitHub Pages Only)
 ```
 ┌─────────────────┐
 │  GitHub Pages   │  Static website hosting (free)
@@ -123,6 +148,28 @@ Access with: `https://yoursite.com/pocket-booth/?key=wedding`
 │  localStorage   │  - Photo strips (base64)
 └─────────────────┘  - Gallery data
                      - Photo count per key
+```
+
+### Full Setup (with Google Drive Upload)
+```
+┌─────────────────┐
+│  GitHub Pages   │  Frontend (React + Vite)
+│   (Frontend)    │  - Camera API
+└────────┬────────┘  - Photo capture
+         │
+         │ API Calls
+         ▼
+┌─────────────────┐
+│     Vercel      │  Backend (Python Flask)
+│   (Backend)     │  - OAuth 2.0 flow
+└────────┬────────┘  - Photo upload API
+         │
+         │ Google Drive API
+         ▼
+┌─────────────────┐
+│  Google Drive   │  Cloud storage
+│                 │  - Photo backup
+└─────────────────┘  - 24hr OAuth sessions
 ```
 
 ---
@@ -164,9 +211,11 @@ npm run preview
 ### Deploy
 
 ```bash
-# Deploy to GitHub Pages
-npm run deploy
+# Deploy to GitHub Pages (frontend only)
+yarn deploy
 ```
+
+**Important**: `yarn deploy` only deploys the React frontend to GitHub Pages. For Vercel backend deployment, see [DEPLOYMENT.md](./DEPLOYMENT.md).
 
 ---
 

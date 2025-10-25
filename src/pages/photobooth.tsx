@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { FaCamera, FaArrowLeft, FaDownload } from 'react-icons/fa6';
+import { FaCamera, FaArrowLeft, FaDownload, FaCloudArrowUp } from 'react-icons/fa6';
 import { Footer } from '../components/Footer';
 import { FilterType, getCSSFilter, applyCanvasFilter } from '../utils/filters';
 import { downloadPhotoStrip } from '../utils/photostrip';
 import { incrementPhotoCount } from '../utils/configManager';
+import { uploadPhotoStripToGoogleDrive, isUploadConfigured, checkAuthorizationStatus, getAuthorizationUrl } from '../utils/googleDriveUpload';
 
 type PhotoBoothProps = {
   navigateTo: (route: string) => void;
@@ -29,11 +30,22 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [cameraReady, setCameraReady] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
+  const [uploadMessage, setUploadMessage] = useState('');
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const photoCount = appState?.photoCount || 4;
   const cameraFacing = appState?.cameraFacing || 'user';
   const shouldMirror = cameraFacing === 'user';
   const debugCamera = appState?.debugCamera || false;
   const selectedFilter = (appState?.selectedFilter as FilterType) || 'normal';
+  const uploadConfigured = isUploadConfigured();
+
+  // Check authorization status on component mount
+  useEffect(() => {
+    if (uploadConfigured) {
+      checkAuthorizationStatus().then(setIsAuthorized);
+    }
+  }, [uploadConfigured]);
 
   useEffect(() => {
     let streamRef: MediaStream | null = null;
@@ -342,6 +354,73 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
     downloadPhotoStrip(photoStrip.photos, `photo-strip-${photoStrip.id}.jpg`);
   };
 
+  const handleUploadToGoogleDrive = async () => {
+    if (!photoStrip) return;
+
+    // Check if user is authorized
+    const authorized = await checkAuthorizationStatus();
+    if (!authorized) {
+      setIsAuthorized(false);
+      setUploadStatus('error');
+      setUploadMessage('Not authorized. Please authorize Google Drive access first.');
+      return;
+    }
+
+    setUploadStatus('uploading');
+    setUploadMessage('Uploading photos to Google Drive...');
+
+    try {
+      const results = await uploadPhotoStripToGoogleDrive(
+        photoStrip.photos,
+        `photo-strip-${photoStrip.id}`
+      );
+
+      // Check if all uploads succeeded
+      const allSuccess = results.every(r => r.success);
+      const someSuccess = results.some(r => r.success);
+
+      if (allSuccess) {
+        setUploadStatus('success');
+        setUploadMessage(`Successfully uploaded ${results.length} photos!`);
+      } else if (someSuccess) {
+        const successCount = results.filter(r => r.success).length;
+        setUploadStatus('error');
+        setUploadMessage(`Uploaded ${successCount} of ${results.length} photos. Some uploads failed.`);
+      } else {
+        setUploadStatus('error');
+        const errorMsg = results[0]?.error || 'Upload failed';
+        setUploadMessage(errorMsg);
+
+        // If authorization failed, update the state
+        if (results[0]?.authorized === false) {
+          setIsAuthorized(false);
+        }
+      }
+    } catch (error) {
+      setUploadStatus('error');
+      setUploadMessage(error instanceof Error ? error.message : 'Upload failed');
+    }
+  };
+
+  const handleAuthorizeGoogleDrive = () => {
+    const authUrl = getAuthorizationUrl();
+    if (authUrl) {
+      window.open(authUrl, '_blank', 'width=600,height=700');
+
+      // Poll for authorization status every 2 seconds
+      const pollInterval = setInterval(async () => {
+        const authorized = await checkAuthorizationStatus();
+        if (authorized) {
+          setIsAuthorized(true);
+          clearInterval(pollInterval);
+        }
+      }, 2000);
+
+      // Stop polling after 5 minutes
+      setTimeout(() => clearInterval(pollInterval), 5 * 60 * 1000);
+    }
+  };
+
   const reset = () => {
     console.log('Reset called - stopping camera first');
 
@@ -620,22 +699,68 @@ export const PhotoBoothPage = ({ navigateTo, appState, setAppState, refs }: Phot
                 </div>
               </div>
 
-              <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-                <button
-                  onClick={handleDownloadStrip}
-                  className="font-bold py-2 px-4 sm:py-2.5 sm:px-6 md:py-3 md:px-8 text-sm sm:text-base md:text-lg doodle-button transition-colors flex items-center justify-center gap-2 rotate-1 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 border-gray-800 dark:border-gray-300"
-                >
-                  <FaDownload className="w-4 h-4 sm:w-5 sm:h-5" />
-                  Download Strip
-                </button>
+              <div className="mt-4 sm:mt-6 flex flex-col gap-3 sm:gap-4">
+                {/* Main action buttons */}
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+                  <button
+                    onClick={handleDownloadStrip}
+                    className="font-bold py-2 px-4 sm:py-2.5 sm:px-6 md:py-3 md:px-8 text-sm sm:text-base md:text-lg doodle-button transition-colors flex items-center justify-center gap-2 rotate-1 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 border-gray-800 dark:border-gray-300"
+                  >
+                    <FaDownload className="w-4 h-4 sm:w-5 sm:h-5" />
+                    Download Strip
+                  </button>
 
-                <button
-                  onClick={reset}
-                  className="font-bold py-2 px-4 sm:py-2.5 sm:px-6 md:py-3 md:px-8 text-sm sm:text-base md:text-lg doodle-button transition-colors flex items-center justify-center gap-2 -rotate-1 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300"
-                >
-                  <FaCamera className="w-4 h-4 sm:w-5 sm:h-5" />
-                  Take Another
-                </button>
+                  <button
+                    onClick={reset}
+                    className="font-bold py-2 px-4 sm:py-2.5 sm:px-6 md:py-3 md:px-8 text-sm sm:text-base md:text-lg doodle-button transition-colors flex items-center justify-center gap-2 -rotate-1 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-300 border-gray-800 dark:border-gray-300"
+                  >
+                    <FaCamera className="w-4 h-4 sm:w-5 sm:h-5" />
+                    Take Another
+                  </button>
+                </div>
+
+                {/* Google Drive upload section */}
+                {uploadConfigured && (
+                  <div className="mt-2">
+                    {!isAuthorized ? (
+                      <button
+                        onClick={handleAuthorizeGoogleDrive}
+                        className="w-full font-bold py-2 px-4 sm:py-2.5 sm:px-6 text-sm sm:text-base doodle-button transition-colors flex items-center justify-center gap-2 bg-blue-500 dark:bg-blue-600 text-white border-blue-600 dark:border-blue-700"
+                      >
+                        <FaCloudArrowUp className="w-4 h-4 sm:w-5 sm:h-5" />
+                        Authorize Google Drive
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleUploadToGoogleDrive}
+                        disabled={uploadStatus === 'uploading'}
+                        className={`w-full font-bold py-2 px-4 sm:py-2.5 sm:px-6 text-sm sm:text-base doodle-button transition-colors flex items-center justify-center gap-2 ${
+                          uploadStatus === 'uploading'
+                            ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+                            : uploadStatus === 'success'
+                            ? 'bg-green-500 dark:bg-green-600'
+                            : uploadStatus === 'error'
+                            ? 'bg-red-500 dark:bg-red-600'
+                            : 'bg-blue-500 dark:bg-blue-600'
+                        } text-white border-blue-600 dark:border-blue-700`}
+                      >
+                        <FaCloudArrowUp className={`w-4 h-4 sm:w-5 sm:h-5 ${uploadStatus === 'uploading' ? 'animate-pulse' : ''}`} />
+                        {uploadStatus === 'uploading' ? 'Uploading...' : uploadStatus === 'success' ? 'Uploaded!' : 'Upload to Google Drive'}
+                      </button>
+                    )}
+
+                    {/* Upload status message */}
+                    {uploadMessage && (
+                      <p className={`text-xs sm:text-sm mt-2 text-center ${
+                        uploadStatus === 'success' ? 'text-green-600 dark:text-green-400' :
+                        uploadStatus === 'error' ? 'text-red-600 dark:text-red-400' :
+                        'text-gray-600 dark:text-gray-400'
+                      }`}>
+                        {uploadMessage}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
